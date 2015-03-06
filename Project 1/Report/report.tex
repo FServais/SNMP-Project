@@ -3,7 +3,7 @@
 %PACKAGES
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[francais]{babel}
+\usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathrsfs}
@@ -53,15 +53,23 @@
 \maketitle
 
 \section{Retrieving variables manually}
+The relevant MIB files according to the questions are the following:
+\begin{itemize}
+	\item \texttt{SNMPv2-MIB} (\texttt{sysDescr})
+	\item \texttt{IP-MIB} (\texttt{ipForwarding}, \texttt{ipDefaultTTL})
+	\item \texttt{IF-MIB} (\texttt{ifNumber}, \texttt{ifDescr}, \texttt{ifType}, \texttt{ifOperStatus}, \texttt{ifPhysAddress}, \texttt{ifMtu})
+\end{itemize}
+
+Those three MIB's has been added in the \texttt{~/.snmp/snmp.conf} file.
 
 	\subsection{What is the system description (sysDescr)?}
-We use the \texttt{snmpget} command which will get the value of the leaf "sysDescr" (1.3.6.1.2.1.1.1.0) on the OID tree.
+We use the \texttt{snmpget} command which will get the value of the leaf \texttt{sysDescr} (1.3.6.1.2.1.1.1.0) on the OID tree.
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.1.1.0 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be sysDescr.0 -v 2c -c run69Zork!}
 \end{center}
 This is the reply: 
 \begin{center}
-	\texttt{iso.3.6.1.2.1.1.1.0 = STRING: "Cisco Internetwork Operating System Software 
+	\texttt{SNMPv2-MIB::sysDescr.0 = STRING: Cisco Internetwork Operating System Software 
 IOS (tm) C2600 Software (C2600-IK8O3S-M), Version 12.2(11)T,  RELEASE SOFTWARE (fc1)
 TAC Support: http://www.cisco.com/tac
 Copyright (c) 1986-2002 by cisco Systems, Inc.
@@ -70,23 +78,23 @@ Compiled Thu 01-Aug-02 12:47 by cca"}
 
 
 	\subsection{Is IP forwarding enabled?}
-In the same way we used \texttt{snmpget} previously, we get the value of the object "ipForwarding" (1.3.6.1.2.1.4.1.0).
+In the same way we used \texttt{snmpget} previously, we get the value of the object \texttt{ipForwarding} (1.3.6.1.2.1.4.1.0).
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.4.1.0 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ipForwarding.0 -v 2c -c run69Zork!}
 \end{center}
 This is the reply: 
 \begin{center}
-	\texttt{iso.3.6.1.2.1.4.1.0 = INTEGER: 1}
+	\texttt{IP-MIB::ipForwarding.0 = INTEGER: forwarding(1)}
 \end{center}
-The value 1 tells that the forwarding is active.\footnote{http://tools.cisco.com/Support/SNMP/do/BrowseOID.do?local=en\&translate=Translate\&objectInput=1.3.6.1.2.1.4.1}
+The value is set to "forwarding".
 
 	\subsection{How many interfaces are present in that router?}
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.2.1.0 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ifNumber.0 -v 2c -c run69Zork!}
 \end{center}
 This is the reply: 
 \begin{center}
-	\texttt{iso.3.6.1.2.1.2.1.0 = INTEGER: 5}
+	\texttt{IF-MIB::ifNumber.0 = INTEGER: 5}
 \end{center}
 There are so 5 interfaces.
 
@@ -94,155 +102,87 @@ There are so 5 interfaces.
 
 To get the informations about each entry, we use the \texttt{snmpwalk} command which will get the subtree from the OID node that is given to it, in our case \texttt{ifTable} (1.3.6.1.2.1.2.2) :
 \begin{center}
-	\texttt{snmpwalk hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.2.2 -v 2c -c run69Zork!}
+	\texttt{snmpwalk hawk.run.montefiore.ulg.ac.be ifTable -v 2c -c run69Zork!}
 \end{center}
-This is the reply: 
-\begin{center}
-	\texttt{\\iso.3.6.1.2.1.2.2.1.1.1 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.1.2 = INTEGER: 2
-\\iso.3.6.1.2.1.2.2.1.1.3 = INTEGER: 3
-\\iso.3.6.1.2.1.2.2.1.1.4 = INTEGER: 4
-\\iso.3.6.1.2.1.2.2.1.1.5 = INTEGER: 5
-\\iso.3.6.1.2.1.2.2.1.2.1 = STRING: "FastEthernet0/0"
-\\iso.3.6.1.2.1.2.2.1.2.2 = STRING: "Serial0/0"
-\\iso.3.6.1.2.1.2.2.1.2.3 = STRING: "FastEthernet0/1"
-\\iso.3.6.1.2.1.2.2.1.2.4 = STRING: "Serial0/1"
-\\iso.3.6.1.2.1.2.2.1.2.5 = STRING: "Null0"
-\\iso.3.6.1.2.1.2.2.1.3.1 = INTEGER: 6
-\\iso.3.6.1.2.1.2.2.1.3.2 = INTEGER: 22
-\\iso.3.6.1.2.1.2.2.1.3.3 = INTEGER: 6
-\\iso.3.6.1.2.1.2.2.1.3.4 = INTEGER: 22
-\\iso.3.6.1.2.1.2.2.1.3.5 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.4.1 = INTEGER: 1500
-\\iso.3.6.1.2.1.2.2.1.4.2 = INTEGER: 1500
-\\iso.3.6.1.2.1.2.2.1.4.3 = INTEGER: 1500
-\\iso.3.6.1.2.1.2.2.1.4.4 = INTEGER: 1500
-\\iso.3.6.1.2.1.2.2.1.4.5 = INTEGER: 1500
-\\iso.3.6.1.2.1.2.2.1.5.1 = Gauge32: 100000000
-\\iso.3.6.1.2.1.2.2.1.5.2 = Gauge32: 4000000
-\\iso.3.6.1.2.1.2.2.1.5.3 = Gauge32: 100000000
-\\iso.3.6.1.2.1.2.2.1.5.4 = Gauge32: 1544000
-\\iso.3.6.1.2.1.2.2.1.5.5 = Gauge32: 4294967295
-\\iso.3.6.1.2.1.2.2.1.6.1 = Hex-STRING: 00 07 85 A8 83 20 
-\\iso.3.6.1.2.1.2.2.1.6.2 = ""
-\\iso.3.6.1.2.1.2.2.1.6.3 = Hex-STRING: 00 07 85 A8 83 21 
-\\iso.3.6.1.2.1.2.2.1.6.4 = ""
-\\iso.3.6.1.2.1.2.2.1.6.5 = ""
-\\iso.3.6.1.2.1.2.2.1.7.1 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.7.2 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.7.3 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.7.4 = INTEGER: 2
-\\iso.3.6.1.2.1.2.2.1.7.5 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.8.1 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.8.2 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.8.3 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.8.4 = INTEGER: 2
-\\iso.3.6.1.2.1.2.2.1.8.5 = INTEGER: 1
-\\iso.3.6.1.2.1.2.2.1.9.1 = Timeticks: (3227) 0:00:32.27
-\\iso.3.6.1.2.1.2.2.1.9.2 = Timeticks: (2928) 0:00:29.28
-\\iso.3.6.1.2.1.2.2.1.9.3 = Timeticks: (3228) 0:00:32.28
-\\iso.3.6.1.2.1.2.2.1.9.4 = Timeticks: (2769) 0:00:27.69
-\\iso.3.6.1.2.1.2.2.1.9.5 = Timeticks: (0) 0:00:00.00
-\\iso.3.6.1.2.1.2.2.1.10.1 = Counter32: 273891205
-\\iso.3.6.1.2.1.2.2.1.10.2 = Counter32: 52262172
-\\iso.3.6.1.2.1.2.2.1.10.3 = Counter32: 76235583
-\\iso.3.6.1.2.1.2.2.1.10.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.10.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.11.1 = Counter32: 1684121
-\\iso.3.6.1.2.1.2.2.1.11.2 = Counter32: 385624
-\\iso.3.6.1.2.1.2.2.1.11.3 = Counter32: 468126
-\\iso.3.6.1.2.1.2.2.1.11.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.11.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.12.1 = Counter32: 1869685
-\\iso.3.6.1.2.1.2.2.1.12.2 = Counter32: 132715
-\\iso.3.6.1.2.1.2.2.1.12.3 = Counter32: 136332
-\\iso.3.6.1.2.1.2.2.1.12.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.12.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.13.1 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.13.2 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.13.3 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.13.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.13.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.14.1 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.14.2 = Counter32: 1
-\\iso.3.6.1.2.1.2.2.1.14.3 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.14.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.14.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.15.1 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.15.2 = Counter32: 3
-\\iso.3.6.1.2.1.2.2.1.15.3 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.15.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.15.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.16.1 = Counter32: 143253584
-\\iso.3.6.1.2.1.2.2.1.16.2 = Counter32: 54688364
-\\iso.3.6.1.2.1.2.2.1.16.3 = Counter32: 112095835
-\\iso.3.6.1.2.1.2.2.1.16.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.16.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.17.1 = Counter32: 1051186
-\\iso.3.6.1.2.1.2.2.1.17.2 = Counter32: 702708
-\\iso.3.6.1.2.1.2.2.1.17.3 = Counter32: 623349
-\\iso.3.6.1.2.1.2.2.1.17.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.17.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.18.1 = Counter32: 272692
-\\iso.3.6.1.2.1.2.2.1.18.2 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.18.3 = Counter32: 443574
-\\iso.3.6.1.2.1.2.2.1.18.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.18.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.19.1 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.19.2 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.19.3 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.19.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.19.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.20.1 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.20.2 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.20.3 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.20.4 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.20.5 = Counter32: 0
-\\iso.3.6.1.2.1.2.2.1.21.1 = Gauge32: 0
-\\iso.3.6.1.2.1.2.2.1.21.2 = Gauge32: 0
-\\iso.3.6.1.2.1.2.2.1.21.3 = Gauge32: 0
-\\iso.3.6.1.2.1.2.2.1.21.4 = Gauge32: 0
-\\iso.3.6.1.2.1.2.2.1.21.5 = Gauge32: 0
-\\iso.3.6.1.2.1.2.2.1.22.1 = OID: ccitt.0
-\\iso.3.6.1.2.1.2.2.1.22.2 = OID: ccitt.0
-\\iso.3.6.1.2.1.2.2.1.22.3 = OID: ccitt.0
-\\iso.3.6.1.2.1.2.2.1.22.4 = OID: ccitt.0
-\\iso.3.6.1.2.1.2.2.1.22.5 = OID: ccitt.0}
-\end{center}
+We got all the informations contained in that table, here are the useful ones : 
+\begin{verbatim}
+	IF-MIB::ifIndex.1 = INTEGER: 1
+	IF-MIB::ifIndex.2 = INTEGER: 2
+	IF-MIB::ifIndex.3 = INTEGER: 3
+	IF-MIB::ifIndex.4 = INTEGER: 4
+	IF-MIB::ifIndex.5 = INTEGER: 5
+	IF-MIB::ifDescr.1 = STRING: FastEthernet0/0
+	IF-MIB::ifDescr.2 = STRING: Serial0/0
+	IF-MIB::ifDescr.3 = STRING: FastEthernet0/1
+	IF-MIB::ifDescr.4 = STRING: Serial0/1
+	IF-MIB::ifDescr.5 = STRING: Null0
+	IF-MIB::ifType.1 = INTEGER: ethernetCsmacd(6)
+	IF-MIB::ifType.2 = INTEGER: propPointToPointSerial(22)
+	IF-MIB::ifType.3 = INTEGER: ethernetCsmacd(6)
+	IF-MIB::ifType.4 = INTEGER: propPointToPointSerial(22)
+	IF-MIB::ifType.5 = INTEGER: other(1)
+	IF-MIB::ifMtu.1 = INTEGER: 1500
+	IF-MIB::ifMtu.2 = INTEGER: 1500
+	IF-MIB::ifMtu.3 = INTEGER: 1500
+	IF-MIB::ifMtu.4 = INTEGER: 1500
+	IF-MIB::ifMtu.5 = INTEGER: 1500
+	IF-MIB::ifPhysAddress.1 = STRING: 0:7:85:a8:83:20
+	IF-MIB::ifPhysAddress.2 = STRING: 
+	IF-MIB::ifPhysAddress.3 = STRING: 0:7:85:a8:83:21
+	IF-MIB::ifPhysAddress.4 = STRING: 
+	IF-MIB::ifPhysAddress.5 = STRING: 
+	IF-MIB::ifOperStatus.1 = INTEGER: up(1)
+	IF-MIB::ifOperStatus.2 = INTEGER: up(1)
+	IF-MIB::ifOperStatus.3 = INTEGER: up(1)
+	IF-MIB::ifOperStatus.4 = INTEGER: down(2)
+	IF-MIB::ifOperStatus.5 = INTEGER: up(1)
+\end{verbatim}
+For each interface, we have its index (\texttt{IF-MIB::ifIndex}), its name (\texttt{IF-MIB::ifDescr}), its type (\texttt{IF-MIB::ifType}) and its status (\texttt{IF-MIB::ifOperStatus}). For the latter, the value is set to "up" when the interface is on and "down" when the interface is off.
 
 	\subsection{What is the MAC address of FastEthernet0/0?}
-We saw that "FastEthernet0/0" is the number 1 entry in the table. Knowing that the MAC address is contained in "ifPhysAddress" (OID: 1.3.6.1.2.1.2.2.1.6), we can access the information using: 
+We saw that "FastEthernet0/0" is at the index 1 in the table. Knowing that the MAC address is contained in \texttt{ifPhysAddress} (OID: 1.3.6.1.2.1.2.2.1.6), we can access the information using: 
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.2.2.1.6.1 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ifPhysAddress.1 -v 2c -c run69Zork!}
 \end{center}
 This is the reply: 
 \begin{center}
-	\texttt{iso.3.6.1.2.1.2.2.1.6.1 = Hex-STRING: 00 07 85 A8 83 20 }
+	\texttt{IF-MIB::ifPhysAddress.1 = STRING: 0:7:85:a8:83:20}
 \end{center}
 
 	\subsection{What is the MTU of Serial0/1?}
-We saw that "Serial0/1" is the number 4 entry in the table. Knowing that the MTU is contained in "ifMtu" (OID: 1.3.6.1.2.1.2.2.1.4), we can access the information using: 
+We saw that "Serial0/1" is at index 4 in the table. Knowing that the MTU is contained in \texttt{ifMtu} (OID: 1.3.6.1.2.1.2.2.1.4), we can access the information using: 
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.2.2.1.4.1 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ifMtu.4 -v 2c -c run69Zork!}
 \end{center}
 This is the reply: 
 \begin{center}
-	\texttt{iso.3.6.1.2.1.2.2.1.4.1 = INTEGER: 1500}
+	\texttt{IF-MIB::ifMtu.4 = INTEGER: 1500}
 \end{center}
 
 	\subsection{What is the default IP TTL?}
-The information is contained in the "ipDefaultTTL" (OID: 1.3.6.1.2.1.4.2). 
+The information is contained in the \texttt{ipDefaultTTL} (OID: 1.3.6.1.2.1.4.2). 
 
 \begin{center}
-	\texttt{snmpget hawk.run.montefiore.ulg.ac.be 1.3.6.1.2.1.4.2.0 -v 2c -c run69Zork!}
+	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ipDefaultTTL.0 -v 2c -c run69Zork!}
 \end{center}
 \begin{center}
-	\texttt{iso.3.6.1.2.1.4.2.0 = INTEGER: 255}
+	\texttt{IP-MIB::ipDefaultTTL.0 = INTEGER: 255}
 \end{center}
 The TTL is so of 255.
 
 	\subsection{Set the default IP TTL to a different value}
-
+We use the \texttt{snmpset} command to try to set a value into the \texttt{ipDefaultTTL} field.
+\begin{center}
+	\texttt{snmpset -v 2c -c run69Zork! hawk.run.montefiore.ulg.ac.be ipDefaultTTL.0 i 200}
+\end{center}
+This is the reply:
+\begin{verbatim}
+	Error in packet.
+	Reason: noAccess
+	Failed object: IP-MIB::ipDefaultTTL.0
+	zsh: exit 2     snmpset -v 2c -c run69Zork! hawk.run.montefiore.ulg.ac.be ipDefaultTTL.0 i 20
+\end{verbatim}
+We have thus no write access to the object. Since the MIB access policy for that object is "read-write", it means that the SNMP mode access (related to the community) is set to "READ-ONLY".
 
 \section{Retrieving variables from a script}
 
