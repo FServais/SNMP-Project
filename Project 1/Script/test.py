@@ -1,6 +1,7 @@
 import time
 import logging
 import datetime
+import sys
 
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
@@ -58,9 +59,9 @@ logging.info("|              %d (+%d)                             %d (+%d)" % (p
 prev_matlab_received = prev_packets_received
 prev_matlab_sent = prev_packets_sent
 
-matlab_data = open('matlab_data.dat', 'a')
+#matlab_data = open('matlab_data.dat', 'a')
 message = "%d %d %d %d %d\n" % (num_min, prev_matlab_received, prev_matlab_sent, diff_received, diff_sent)
-matlab_data.write(message)
+sys.stderr.write(message)
 while True:
     # Wait 5 minutes 
     time.sleep(300)
@@ -91,7 +92,7 @@ while True:
     prev_matlab_received += diff_received
     prev_matlab_sent += diff_sent
     message = "%d %d %d %d %d\n" % (num_min, prev_matlab_received, prev_matlab_sent, diff_received, diff_sent)
-    matlab_data.write(message)
+    sys.stderr.write(message)
 
     # Check duration of the executiin
     time_now = datetime.datetime.now()
@@ -101,7 +102,6 @@ while True:
     if diff_time.days > 0:
         break
 
-f.close()
 
 
     
