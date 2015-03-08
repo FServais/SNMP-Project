@@ -185,8 +185,27 @@ This is the reply:
 We have thus no write access to the object. Since the MIB access policy for that object is "read-write", it means that the SNMP mode access (related to the community) is set to "READ-ONLY".
 
 \section{Retrieving variables from a script}
+In order to count the number of packets received and emitted by Hawk, we used the following process. 
+We decided to look at the interface level how much packets were received and emitted. For the packets received, we found the following objects :
+\begin{itemize}
+\item \textbf{ifInUcastPkts} : it counts the number of unicast packets transmitted by the interface,
+\item \textbf{ifInMulticastPkts} :  the number of multicast packets transmitted
+\item \textbf{ifInBroadcastPkts} : the number of broadcast packets transmitted
+\item \textbf{ifInDiscards} : the number of packets which were not transmitted, but yet containing no error
+\item \textbf{ifInErrors} : the number of packets which were not transmitted due to errors. 
+\end{itemize}
+By adding these counters, we find the total number of packets received. 
+\paragraph{}
+And for the emitted packets, we used the following objects:
+\begin{itemize}
+\item \textbf{ifOutUcastPkts} : the number of unicast packets which should be sent by the interface, including the discarded ones.
+\item \textbf{ifOutMulticastPkts} : the number of multicast packets which should be emitted, including the discarded ones.
+\item \textbf{ifOutBroadcastPkts} : the number of broadcast packets which should be sent, including the discarded ones.
+\end{itemize}  
+By adding these counters, we find the total number of packets emitted .
 
-
+\paragraph{}
+We notice an increase in the traffic around 11h28.
 \newpage
 
 \end{document}
