@@ -49,7 +49,7 @@ def getPacketsReceived_if():
     return getNumberPackets_if(oid_in_prefix)
 
 def getPacketsSent_if():
-    oid_out_prefix = [(1,3,6,1,2,1,2,2,1,17), (1,3,6,1,2,1,31,1,1,1,4), (1,3,6,1,2,1,31,1,1,1,5), (1,3,6,1,2,1,2,2,1,19), (1,3,6,1,2,1,2,2,1,20)]
+    oid_out_prefix = [(1,3,6,1,2,1,2,2,1,17), (1,3,6,1,2,1,31,1,1,1,4), (1,3,6,1,2,1,31,1,1,1,5)]
     return getNumberPackets_if(oid_out_prefix)
 
 
