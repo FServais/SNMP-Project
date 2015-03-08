@@ -58,7 +58,7 @@ def getPacketsReceived_ip():
     return getValue(oid_in)
 
 def getPacketsSent_ip():
-    oids_out = [(1,3,6,1,2,1,4,10,0), (1,3,6,1,2,1,4,11,0), (1,3,6,1,2,1,4,12,0)]
+    oids_out = [(1,3,6,1,2,1,4,10,0), (1,3,6,1,2,1,4,6,0), (1,3,6,1,2,1,4,11,0), (1,3,6,1,2,1,4,12,0)]
 
     total = 0
     for oid in oids_out:
@@ -102,7 +102,7 @@ diff_received_ip = 0
 diff_sent_ip = 0
 
 logging.info("| Number packets received [IF] (difference)    Number packets sent [IF] (difference)      Number packets received [IP] (difference)    Number packets sent [IP] (difference)")
-logging.info("|              %d (+%d)                             %d (+%d)                           %d (%d)                             %d (%d)" % (prev_packets_received_if, diff_received_if, prev_packets_sent_if, diff_sent_if, prev_packets_received_ip, diff_received_ip, prev_packets_sent_ip, diff_sent_ip))
+logging.info("|              %d (+%d)                             %d (+%d)                                     %d (%d)                                  %d (%d)" % (prev_packets_received_if, diff_received_if, prev_packets_sent_if, diff_sent_if, prev_packets_received_ip, diff_received_ip, prev_packets_sent_ip, diff_sent_ip))
 
 # To generate data file for Matlab
 prev_matlab_received_if = prev_packets_received_if
@@ -115,7 +115,7 @@ message = "%d %d %d %d %d %d %d %d %d\n" % (num_min, prev_matlab_received_if, pr
 sys.stderr.write(message)
 while True:
     # Wait 5 minutes 
-    time.sleep(5)
+    time.sleep(300)
     num_min += 5
 
     packets_received_if = getPacketsReceived_if();
@@ -130,7 +130,7 @@ while True:
     diff_sent_ip = getDiffCounter32(prev_packets_sent_ip, packets_sent_ip);
 
     # Log
-    message = '|              %d (+%d)                             %d (+%d)                           %d (%d)                             %d (%d)' % (packets_received_if, diff_received_if, packets_sent_if, diff_sent_if, packets_received_ip, diff_received_ip, packets_sent_ip, diff_sent_ip)
+    message = '|              %d (+%d)                             %d (+%d)                                     %d (%d)                                  %d (%d)' % (packets_received_if, diff_received_if, packets_sent_if, diff_sent_if, packets_received_ip, diff_received_ip, packets_sent_ip, diff_sent_ip)
     logging.info(message)
 
     prev_packets_received_if = packets_received_if
