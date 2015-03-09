@@ -1,3 +1,5 @@
+# Script that measures the differences in the number of packets received and sent during 24 hours, on the "hawk" router.
+
 import time
 import logging
 import datetime
@@ -60,7 +62,7 @@ def getDiffCounter32(prev_value, value):
         return value - prev_value
 
 #########################################
-logging.basicConfig(filename='data_packets.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(filename='packets.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # For the script to have a duration of 24h
 time_start = datetime.datetime.now()
@@ -84,11 +86,12 @@ logging.info("|                     %d                                  %d" % (d
 prev_data_received = prev_packets_received
 prev_data_sent = prev_packets_sent
 
-message = "%d %d %d\n" % (num_min, diff_received, diff_sent)
-sys.stderr.write(message)
+# Write data file to plot (this works only when using "nohup" command to let the script continue after the deconnection of the user)
+# message = "%d %d %d\n" % (num_min, diff_received, diff_sent)
+# sys.stderr.write(message)
 while True:
     # Wait 5 minutes 
-    time.sleep(5)
+    time.sleep(300)
     num_min += 5
 
     packets_received = getPacketsReceived();
@@ -109,8 +112,8 @@ while True:
     # Data log
     prev_data_received += diff_received
     prev_data_sent += diff_sent
-    message = "%d %d %d\n" % (num_min, diff_received, diff_sent)
-    sys.stderr.write(message)
+    # message = "%d %d %d\n" % (num_min, diff_received, diff_sent)
+    # sys.stderr.write(message)
 
     # Check duration of the executiin
     time_now = datetime.datetime.now()
