@@ -9,13 +9,19 @@ configs = []
 for line in config_file:
 	configs.append(line)
 
-print configs
-
 # Matching the IP
 match_ip = re.match('([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})/([0-9]{1,2})', ip)
-print "IP:     ", match_ip.group(1)
-print "PREFIX: ", match_ip.group(2)
+#print "IP:     ", match_ip.group(1)
+#print "PREFIX: ", match_ip.group(2)
 
+ip = match_ip.group(1)
+prefix = match_ip.group(2)
+
+# tuple containing the IP line
+t_ip = (ip, prefix)
+
+# list of tuple containing the fields of the configurations
+t_configs = []
 
 # Matching the configurations
 for config in configs:
@@ -50,6 +56,9 @@ for config in configs:
 		priv_pwd = match_config.group(9)
 
 	
-	print port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd
+#	print port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd
 
+	t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
+
+print "Configurations: ", t_configs
 
