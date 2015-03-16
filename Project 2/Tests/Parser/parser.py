@@ -1,7 +1,7 @@
 import re
 
 # Read file
-config_file = open('configs.txt', 'r')
+config_file = open('config.txt', 'r')
 
 ip = config_file.readline()
 configs = []
