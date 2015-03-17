@@ -1,5 +1,6 @@
 import re
 
+"""
 # Read file
 config_file = open('config.txt', 'r')
 
@@ -61,4 +62,63 @@ for config in configs:
 	t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
 print "Configurations: ", t_configs
+"""
+prefix = "22"
+ip = "132.165.0.0"
+list_ip = ip.split(".", 4)
+list_int_ip = [0, 0, 0, 0]
+
+for i in range(0,4):
+    list_int_ip[i] = int(list_ip[i]);
+
+suffix = 32 - int(prefix)
+left = suffix%8
+nb_full_loops = suffix/8
+
+if left != 0 :
+    nb_loops = nb_full_loops + 1
+    
+max_nb_loop = [0, 0, 0, 0]
+for i in range(0,4):
+    
+    if i < nb_full_loops:
+        max_nb_loop[i] = 255
+        
+    elif i < nb_loops:
+        max_nb_loop[i] = pow(2,left)-1
+        
+list_ips = []
+
+i = 0
+oct = [list_int_ip[0], 0, 0, 0]
+while i <= max_nb_loop[3]:
+    
+    j = 0
+    oct[1] = list_int_ip[1]
+    while j <= max_nb_loop[2]:
+        
+        k = 0
+        oct[2] = list_int_ip[2]
+        while k <= max_nb_loop[1]:
+            
+            l = 0
+            oct[3] = list_int_ip[3]
+            while l <= max_nb_loop[0]:
+                
+                list_ips.append(str(oct[0])+"."+str(oct[1])+"."+str(oct[2])+"."+str(oct[3]))
+                oct[3] += 1
+                l += 1
+                 
+            oct[2] += 1
+            k += 1
+            
+        oct[1] +=1
+        j += 1
+   
+    oct[0] += 1
+    i += 1
+print list_ips
+
+
+        
 
