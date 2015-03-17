@@ -78,45 +78,38 @@ nb_full_loops = suffix/8
 if left != 0 :
     nb_loops = nb_full_loops + 1
     
-max_nb_loop = [0, 0, 0, 0]
+max_nb_loop = [1, 1, 1, 1]
 for i in range(0,4):
     
     if i < nb_full_loops:
-        max_nb_loop[i] = 255
+        max_nb_loop[i] = 256
         
     elif i < nb_loops:
-        max_nb_loop[i] = pow(2,left)-1
+        max_nb_loop[i] = pow(2,left)
         
 list_ips = []
 
-i = 0
 oct = [list_int_ip[0], 0, 0, 0]
-while i <= max_nb_loop[3]:
+for i in range(0, max_nb_loop[3]):
     
-    j = 0
     oct[1] = list_int_ip[1]
-    while j <= max_nb_loop[2]:
+    for j in range(0, max_nb_loop[2]):
         
-        k = 0
         oct[2] = list_int_ip[2]
-        while k <= max_nb_loop[1]:
+        for k in range(0, max_nb_loop[1]):
             
-            l = 0
             oct[3] = list_int_ip[3]
-            while l <= max_nb_loop[0]:
+            for l in range(0, max_nb_loop[0]):
                 
                 list_ips.append(str(oct[0])+"."+str(oct[1])+"."+str(oct[2])+"."+str(oct[3]))
                 oct[3] += 1
-                l += 1
                  
             oct[2] += 1
-            k += 1
             
         oct[1] +=1
-        j += 1
    
     oct[0] += 1
-    i += 1
+    
 print list_ips
 
 
