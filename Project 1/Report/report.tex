@@ -60,7 +60,7 @@ The relevant MIB files according to the questions are the following:
 	\item \texttt{IF-MIB} (\texttt{ifNumber}, \texttt{ifDescr}, \texttt{ifType}, \texttt{ifOperStatus}, \texttt{ifPhysAddress}, \texttt{ifMtu})
 \end{itemize}
 
-Those three MIB's has been added in the \texttt{~/.snmp/snmp.conf} file.
+Those three MIB's have been added in the \texttt{~/.snmp/snmp.conf} file.
 
 	\subsection{What is the system description (sysDescr)?}
 We use the \texttt{snmpget} command which will get the value of the leaf \texttt{sysDescr} (1.3.6.1.2.1.1.1.0) on the OID tree.
@@ -89,6 +89,7 @@ This is the reply:
 The value is set to "forwarding".
 
 	\subsection{How many interfaces are present in that router?}
+With the same command, we find the value of \texttt{ifNumber} (1.3.6.1.2.1.2.1.0): 
 \begin{center}
 	\texttt{snmpget hawk.run.montefiore.ulg.ac.be ifNumber.0 -v 2c -c run69Zork!}
 \end{center}
@@ -188,16 +189,16 @@ We have thus no write access to the object. Since the MIB access policy for that
 In order to count the number of packets incoming and outgoing from Hawk, we based our estimations on the \texttt{IP} counters.  
 We neglect the packets which are not datagrams. Most of the objects used are deprecated but as the alternatives recommended by Cisco were not available on Hawk, we were forced to use it.
 \paragraph{}
-For the incoming packets, we used \textbf{ipInReceives}(1.3.6.1.2.1.4.3) it counts all the packets received. 
+For the incoming packets, we used \texttt{ipInReceives} (1.3.6.1.2.1.4.3) which counts all the packets received. 
 \paragraph{}
 For the outgoing packets, we used several objects. 
 \begin{itemize}
-\item \textbf{ipOutRequests} (1.3.6.1.2.1.4.10) : the number of packets submitted by higher layers for transmission, it does not count the forwaded packets.
-\item \textbf{ipOutDiscards} (1.3.6.1.2.1.4.11) : the number of packets discarded.
-\item \textbf{ipOutNoRoutes} (1.3.6.1.2.1.4.12) : the number of packets discarded because there was no known route to their destination.
-\item \textbf{ipForwDatagrams} (1.3.6.1.2.1.4.6) : the number of packets forwarded. 
+\item \texttt{ipOutRequests} (1.3.6.1.2.1.4.10) : the number of packets submitted by higher layers for transmission, it does not count the forwaded packets.
+\item \texttt{ipOutDiscards} (1.3.6.1.2.1.4.11) : the number of packets discarded.
+\item \texttt{ipOutNoRoutes} (1.3.6.1.2.1.4.12) : the number of packets discarded because there was no known route to their destination.
+\item \texttt{ipForwDatagrams} (1.3.6.1.2.1.4.6) : the number of packets forwarded. 
 \end{itemize}
-We realized too late that the ipOutDiscards and ipOutNoRoutes are already included in ipForwDatagrams. There is obviously an impact on our collected data, even if the number of packets discarded or for which no route was found is surely not very high.
+We realized too late that the \texttt{ipOutDiscards} and \texttt{ipOutNoRoutes} are already included in \texttt{ipForwDatagrams}. There is obviously an impact on our collected data, even if the number of packets discarded or for which no route was found is surely not very high.
 \paragraph{}
 We notice on the graph two peaks in the number of packets, the higher one around 9:55 AM and the second one around 12:25 AM.
 \begin{center}
