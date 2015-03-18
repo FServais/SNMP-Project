@@ -1,5 +1,7 @@
 import re
 from pysnmp.entity.rfc3413.oneliner import cmdgen
+from Queue import Queue
+from threading import Thread
 
 # Read file
 config_file = open('config.txt', 'r')
@@ -114,23 +116,80 @@ for ip in list_ips:
     
     for config in t_configs:
         port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
-        targets.append((ip, port, version, sec_name))
+        targets.append((ip, port, version, sec_name, None, None, None, None))
 
 
-agents = {}
+class Worker(Thread):
+    def __init__(self, requests, responses):
+        Thread.__init__(self)
+        self.requests = requests
+        self.responses = responses
+        self.cmdGen = cmdgen.CommandGenerator()
+        self.setDaemon(True)
+        self.start()
+    
+    def run(self):
+        while True:
+            target = self.requests.get()
+            ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
+            
+            authProtocol = None
+            if auth_proto == "SHA":
+                authProtocol=cmdgen.usmHMACSHAAuthProtocol
+            elif auth_proto == "MD5":
+                authProtocol=cmdgen.usmHMACMD5AuthProtocol
+            else:
+                authProtocol=cmdgen.usmNoAuthProtocol
+
+            privProtocol = None
+            if priv_proto == "DES":
+                privProtocol=cmdgen.usmDESPrivProtocol
+            elif priv_proto == "AES":
+                privProtocol=cmdgen.usmAesCfb128Protocol
+            else:
+                privProtocol=cmdgen.usmNoPrivProtocol
+
+            self.responses.append(
+                self.cmdGen.getCmd(
+                    cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
+                                       authProtocol,
+                                       privProtocol),
+                    cmdgen.UdpTransportTarget((ip, int(port))),
+                    ( '1.3.6.1.2.1' )
+                )
+            )
+            self.requests.task_done()
+
+class ThreadPool:
+    def __init__(self, num_threads):
+        self.requests = Queue(num_threads)
+        self.responses = []
+        for _ in range(num_threads):
+            Worker(self.requests, self.responses)
+
+    def addRequest(self, target):
+        self.requests.put(target)
+
+    def getResponses(self): return self.responses
+
+    def waitCompletion(self): self.requests.join()
+
+
+agentsV1V2 = {}
+agents = []
 
 # Callback function that removes the entry in the hashtable 'agent' if an
 # error has occured (typically timeout)
 def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex,
           varBindTable, cbCtx):
     if errorIndication or errorStatus:
-        del agents[sendRequestHandle]
+        del agentsV1V2[sendRequestHandle]
         return 1
 
 
 # Send asynchronous requests to a list of devices ('targets') following the form :
 # (ip, port, version, communityName).
-# This function will populate the hashtable 'agents' with the targets
+# This function will populate the hashtable 'agentsV1V2' with the targets
 # that contains an agent.
 # Note: Only for SNMPv1 and SNMPv2.
 def discoverTargets(targets):
@@ -139,7 +198,7 @@ def discoverTargets(targets):
     # Iterate through all targets
     for target in targets:
         # Get the differents values of the tuple
-        ip, port, version, secName = target
+        ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
 
         # authData depending on the version
         if version == "3":
@@ -149,9 +208,9 @@ def discoverTargets(targets):
 
         authData = None
         if version == "1":
-            authData = cmdgen.CommunityData(secName, mpModel=0)
+            authData = cmdgen.CommunityData(sec_name, mpModel=0)
         elif version == "2":
-            authData = cmdgen.CommunityData(secName)
+            authData = cmdgen.CommunityData(sec_name)
 
         transportTarget = cmdgen.UdpTransportTarget((ip, int(port)))
         var = ( '1.3.6.1.2.1', )
@@ -165,11 +224,60 @@ def discoverTargets(targets):
             lookupNames=True, lookupValues=True
         )
 
-        agents[ret] = target
+        agentsV1V2[ret] = target
 
-    if cmdGen.snmpEngine.transportDispatcher is None:
-        print "WTF?"
     cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+
+
+
+def discoverTargetsV3(targets):
+    pool = ThreadPool(10)
+
+    for target in targets:
+        ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
+
+        if version != "3":
+            continue
+
+        """
+        cmdGen = cmdgen.CommandGenerator()
+
+        authProtocol = None
+        if auth_proto == "SHA":
+            authProtocol=cmdgen.usmHMACSHAAuthProtocol
+        elif auth_proto == "MD5":
+            authProtocol=cmdgen.usmHMACMD5AuthProtocol
+        else:
+            authProtocol=cmdgen.usmNoAuthProtocol
+
+        privProtocol = None
+        if priv_proto == "DES":
+            privProtocol=cmdgen.usmDESPrivProtocol
+        elif priv_proto == "AES":
+            privProtocol=cmdgen.usmAesCfb128Protocol
+        else:
+            privProtocol=cmdgen.usmNoPrivProtocol
+
+        errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
+            cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
+                               authProtocol,
+                               privProtocol),
+            cmdgen.UdpTransportTarget((ip, int(port))),
+            ( '1.3.6.1.2.1' )
+        )
+
+        if not errorIndication and not errorStatus:
+            agents.append(target)
+        """
+        pool.addRequest(target)
+
+    pool.waitCompletion()
+
+    # Walk through responses
+    for errorIndication, errorStatus, errorIndex, varBinds in pool.getResponses():
+        if not errorIndication and not errorStatus:
+           agents.append(target)
+
 
 
 
@@ -179,8 +287,16 @@ def discoverTargets(targets):
 # 
 # =========================================== #
 
-discoverTargets(targets)
+#discoverTargets(targets)
 
-for k in agents:
-    print k, ' -> ', agents[k]
+#for k in agentsV1V2:
+ #   agents.append(agentsV1V2[k])
+
+discoverTargetsV3(targets)
+
+
+
+
+for agent in agents:
+    print agent,
 
