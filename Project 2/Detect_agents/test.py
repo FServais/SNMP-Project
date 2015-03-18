@@ -3,22 +3,7 @@ from pysnmp.proto import rfc1902
 
 agents = {}
 
-target = ('hawk.run.montefiore.ulg.ac.be', 161, 1, 'run69Zork!')
-
-# List of targets in the followin format:
-# ( ( authData, transportTarget, varNames ), ... )
-targets = (
-    # 1-st target (SNMPv1 over IPv4/UDP)
-    ( cmdgen.CommunityData(target[3], mpModel=0),
-      cmdgen.UdpTransportTarget((target[0], target[1])),
-      ( '1.3.6.1.2.1',) ),
-    ( cmdgen.CommunityData(target[3]),
-      cmdgen.UdpTransportTarget((target[0], target[1])),
-      ( '1.3.6.1.2.1',) ),
-    ( cmdgen.CommunityData('falseCumm'),
-      cmdgen.UdpTransportTarget((target[0], target[1])),
-      ( '1.3.6.1.2.1',) )
-)
+targets = [('hawk.run.montefiore.ulg.ac.be', 161, 1, 'run69Zork!'), ('hawk.run.montefiore.ulg.ac.be', 161, 2, 'run69Zork!')]
 
 # Wait for responses or errors, submit GETNEXT requests for further OIDs
 def cbFun(sendRequestHandle, errorIndication, errorStatus, errorIndex,
@@ -32,23 +17,43 @@ def cbFun(sendRequestHandle, errorIndication, errorStatus, errorIndex,
         del agents[sendRequestHandle]
         return 1
 
+# Send asynchronous requests to a list of devices ('targets') following the form :
+# (ip, port, version, communityName).
+# This function will populate the hashtable 'agents' with the targets
+# that contains an agent.
+# Note: Only for SNMPv1 and SNMPv2.
+def discoverTargets(targets):
+    for target in targets:
+        ip, port, version, secName = target
 
-cmdGen  = cmdgen.AsynCommandGenerator()
+        cmdGen  = cmdgen.AsynCommandGenerator()
 
-# Submit initial GETNEXT requests and wait for responses
-for authData, transportTarget, varNames in targets:
+        if version == 1:
+            authData = cmdgen.CommunityData(secName, mpModel=0)
+        elif version == 2:
+            authData = cmdgen.CommunityData(secName)
+        else:
+            return
+        
+        transportTarget = cmdgen.UdpTransportTarget((ip, port))
+        var = ( '1.3.6.1.2.1', )
 
-    #varBindHead = [ x[0] for x in cmdGen.makeReadVarBinds(varNames) ]
+        ret = cmdGen.nextCmd(
+            authData,
+            transportTarget,
+            var,
+            (cbFun, None),
+            lookupNames=True, lookupValues=True
+        )
 
-    ret = cmdGen.nextCmd(
-        authData, transportTarget, varNames,
-        # User-space callback function and its context
-        (cbFun, None),
-        lookupNames=True, lookupValues=True
-    )
-    agents[ret] = target
+        agents[ret] = target
 
-cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+    cmdGen.snmpEngine.transportDispatcher.runDispatcher()    
+
+# =========================================== #
+
+
+discoverTargets(targets)
 
 for k in agents:
     print k, ' -> ', agents[k]
