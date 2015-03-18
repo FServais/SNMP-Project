@@ -109,14 +109,20 @@ for i in range(0, max_nb_loop[3]):
    
     oct[0] += 1
 
-targets = []
+targets1 = []
+targets2 = []
+
 for ip in list_ips:
     
     for config in t_configs:
         port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
-        targets.append((ip, port, version, sec_name))
+        if(version == 3):        
+            targets2.append((ip, port, version, sec_name))
+        else :
+            targets1.append((ip, port, version, sec_name))
 
-
+print targets1
+print targets2
 agents = {}
 
 # Callback function that removes the entry in the hashtable 'agent' if an
@@ -170,8 +176,35 @@ def discoverTargets(targets):
     if cmdGen.snmpEngine.transportDispatcher is None:
         print "WTF?"
     cmdGen.snmpEngine.transportDispatcher.runDispatcher()
-
-
+    
+# Given a list of agents, write a XML file.
+def XMLWriter(agentsList):
+    
+    targets = ET.Element("targets")
+    
+    for i in agentsList:
+        
+        target = ET.SubElement(targets, "target")
+        
+        ip,port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = i
+        ET.SubElement(target, "ip", ).text = ip
+        ET.SubElement(target, "port",).text = port
+        ET.SubElement(target, "version", ).text = version
+        ET.SubElement(target, "sec_name", ).text = sec_name
+        if auth_proto != None:
+            ET.SubElement(target, "auth_proto", ).text = auth_proto
+        if auth_pwd != None:    
+            ET.SubElement(target, "auth_pwd", ).text = auth_pwd
+        if priv_proto != None:        
+            ET.SubElement(target, "priv_proto", ).text = priv_proto
+        if priv_pwd != None:
+            ET.SubElement(target, "priv_pwd", ).text = priv_pwd
+    
+    
+    
+    
+    tree = ET.ElementTree(targets)
+    tree.write("filename.xml")
 
 # =========================================== #
 #
@@ -179,7 +212,7 @@ def discoverTargets(targets):
 # 
 # =========================================== #
 
-discoverTargets(targets)
+# discoverTargets(targets)
 
 for k in agents:
     print k, ' -> ', agents[k]
