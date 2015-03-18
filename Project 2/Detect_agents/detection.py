@@ -127,13 +127,14 @@ def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex
         del agents[sendRequestHandle]
         return 1
 
+
 # Send asynchronous requests to a list of devices ('targets') following the form :
 # (ip, port, version, communityName).
 # This function will populate the hashtable 'agents' with the targets
 # that contains an agent.
 # Note: Only for SNMPv1 and SNMPv2.
 def discoverTargets(targets):
-    cmdGen = cmdgen.AsynCommandGenerator()
+    
 
     # Iterate through all targets
     for target in targets:
@@ -141,14 +142,18 @@ def discoverTargets(targets):
         ip, port, version, secName = target
 
         # authData depending on the version
-        if version == 1:
-            authData = cmdgen.CommunityData(secName, mpModel=0)
-        elif version == 2:
-            authData = cmdgen.CommunityData(secName)
-        else:
+        if version == "3":
             continue
-        
-        transportTarget = cmdgen.UdpTransportTarget((ip, port))
+
+        cmdGen = cmdgen.AsynCommandGenerator()
+
+        authData = None
+        if version == "1":
+            authData = cmdgen.CommunityData(secName, mpModel=0)
+        elif version == "2":
+            authData = cmdgen.CommunityData(secName)
+
+        transportTarget = cmdgen.UdpTransportTarget((ip, int(port)))
         var = ( '1.3.6.1.2.1', )
 
         # Make and send request
@@ -162,7 +167,10 @@ def discoverTargets(targets):
 
         agents[ret] = target
 
-    cmdGen.snmpEngine.transportDispatcher.runDispatcher()    
+    if cmdGen.snmpEngine.transportDispatcher is None:
+        print "WTF?"
+    cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+
 
 
 # =========================================== #
