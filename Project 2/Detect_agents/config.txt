@@ -1,0 +1,5 @@
+139.165.222.0/24
+161 1 public
+161 2 public
+161 2 run69Zork!
+161 3 JohnSmith SHA Fei)bu7re AES Kaeph-ah9
