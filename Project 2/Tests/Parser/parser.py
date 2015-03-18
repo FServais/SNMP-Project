@@ -1,5 +1,5 @@
 import re
-
+import xml.etree.ElementTree as ET
 
 # Read file
 config_file = open('config.txt', 'r')
@@ -113,19 +113,19 @@ for i in range(0, max_nb_loop[3]):
    
     oct[0] += 1
 
-target = []
+targets = []
 # Generate every possible configuration
 for ip in list_ips:
-    
-    config_ip = [ip]
-    for config in t_configs:
         
-        config_ip.extend(config)
-        target.append(config_ip)
-        config_ip = [ip]
+    for config in t_configs:
+        port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
+        targets.append((ip, port, version, sec_name))
 
 
-print target
+root = ET.fromstring("<targets> </targets>")
+
+for target in targets:
+    
         
         
    
