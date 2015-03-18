@@ -1,19 +1,16 @@
 from pysnmp.entity.rfc3413.oneliner import cmdgen
-from pysnmp.proto import rfc1902
 
 agents = {}
 
-targets = [('hawk.run.montefiore.ulg.ac.be', 161, 1, 'run69Zork!'), ('hawk.run.montefiore.ulg.ac.be', 161, 2, 'run69Zork!')]
+targets = [('hawk.run.montefiore.ulg.ac.be', 161, 1, 'run69Zork!'), 
+('hawk.run.montefiore.ulg.ac.be', 161, 2, 'run69Zork!'),
+('hawk.run.montefiore.ulg.ac.be', 161, 2, 'run69Zorky!')]
 
-# Wait for responses or errors, submit GETNEXT requests for further OIDs
-def cbFun(sendRequestHandle, errorIndication, errorStatus, errorIndex,
+# Callback function that removes the entry in the hashtable 'agent' if an
+# error has occured (typically timeout)
+def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex,
           varBindTable, cbCtx):
-    if errorIndication:
-        print(errorIndication)
-        del agents[sendRequestHandle]
-        return 1
-    if errorStatus:
-        print(errorStatus.prettyPrint())
+    if errorIndication or errorStatus:
         del agents[sendRequestHandle]
         return 1
 
@@ -23,11 +20,14 @@ def cbFun(sendRequestHandle, errorIndication, errorStatus, errorIndex,
 # that contains an agent.
 # Note: Only for SNMPv1 and SNMPv2.
 def discoverTargets(targets):
+    # Iterate through all targets
     for target in targets:
+        # Get the differents values of the tuple
         ip, port, version, secName = target
 
         cmdGen  = cmdgen.AsynCommandGenerator()
 
+        # authData depending on the version
         if version == 1:
             authData = cmdgen.CommunityData(secName, mpModel=0)
         elif version == 2:
@@ -38,11 +38,12 @@ def discoverTargets(targets):
         transportTarget = cmdgen.UdpTransportTarget((ip, port))
         var = ( '1.3.6.1.2.1', )
 
+        # Make and send request
         ret = cmdGen.nextCmd(
             authData,
             transportTarget,
             var,
-            (cbFun, None),
+            (callbackFunction, None),
             lookupNames=True, lookupValues=True
         )
 
@@ -50,10 +51,16 @@ def discoverTargets(targets):
 
     cmdGen.snmpEngine.transportDispatcher.runDispatcher()    
 
-# =========================================== #
 
+# =========================================== #
+#
+# Beginning of the script
+# 
+# =========================================== #
 
 discoverTargets(targets)
 
 for k in agents:
     print k, ' -> ', agents[k]
+
+
