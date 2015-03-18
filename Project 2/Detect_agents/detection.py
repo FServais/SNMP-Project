@@ -36,6 +36,7 @@ def isAgent(ip, port, version, community):
 print isAgent("hawk.run.montefiore.ulg.ac.be", 161, 2, "run69Zork!")
 """
 
+"""
 def cbFun(sendRequestHandle, errorIndication, errorStatus, errorIndex,
           varBinds, cbCtx):
     if errorIndication:
@@ -67,8 +68,10 @@ for varName in ( cmdgen.MibVariable('SNMPv2-MIB', 'sysDescr', 0),
     )
 
 cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+"""
 
 """
+
 def cbFun(sendRequestHandle, errorIndication, \
           errorStatus, errorIndex, varBindTable, cbCtx):
     if errorIndication:
@@ -92,20 +95,58 @@ def cbFun(sendRequestHandle, errorIndication, \
 
 cmdGen  = cmdgen.AsynCommandGenerator()
 
-for transportTarget in ( cmdgen.UdpTransportTarget(('hawk.run.montefiore.ulg.ac.be', 161)),
-                         cmdgen.UdpTransportTarget(('192.168.1.1', 161)),
-                         cmdgen.UdpTransportTarget(('10.40.1.1', 161)) ):
+for transportTarget in ( cmdgen.UdpTransportTarget(('hawk.run.montefiore.ulg.ac.be', 161)), ):
     cmdGen.nextCmd(
 
         #cmdgen.UsmUserData('usr-md5-des', 'authkey1', 'privkey1'),
         cmdgen.CommunityData('run69Zork!'),
         transportTarget,
-        ( cmdgen.MibVariable('SNMPv2-MIB', 'sysDescr'), ),
+        ( cmdgen.MibVariable('SNMPv2-MIB', 'sysDescr', 0), ),
         (cbFun, None)
     )
 
 cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+
 """
 
+def cbFun(sendRequestHandle, errorIndication, \
+          errorStatus, errorIndex, varBindTable, cbCtx):
+    if errorIndication:
+        print(errorIndication)
+        return
+    if errorStatus:
+        print('%s at %s' % \
+           (errorStatus.prettyPrint(),
+            errorIndex and varBindTable[-1][int(errorIndex)-1] or '?')
+        )
+        return
+    
+    for varBindRow in varBindTable:
+        for oid, val in varBindRow:
+            if val is None:
+                return    # stop table retrieval
+            else:
+                print('%s = %s' % (oid.prettyPrint(), val.prettyPrint()))
+
+    return True  # continue table retrieval
+
+# Function that get the value of the object with the oid 'oid' on "ip":"port".
+# ip        : ip address of the targeted router
+# port      : port on the targeted router
+# version   : SNMP version to use
+# community : community name
+# oid       : OID from which we want to get the value. (tuple)
+def getValue(ip, port, version, community, oid):
+    cmdGen = cmdgen.AsynCommandGenerator()
+
+    errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+        cmdgen.CommunityData(community),
+        cmdgen.UdpTransportTarget((ip, port)),
+        oid,
+        (cbFun, None)
+    )
+
+    cmdGen.snmpEngine.transportDispatcher.runDispatcher()
 
 
+print getValue('hawk.run.montefiore.ulg.ac.be', 161, 2, 'run69Zork!', (1,3,6,1,2,1,1,1))
