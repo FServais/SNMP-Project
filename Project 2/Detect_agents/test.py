@@ -25,7 +25,7 @@ def discoverTargets(targets):
         # Get the differents values of the tuple
         ip, port, version, secName = target
 
-        cmdGen  = cmdgen.AsynCommandGenerator()
+        cmdGen = cmdgen.AsynCommandGenerator()
 
         # authData depending on the version
         if version == 1:
