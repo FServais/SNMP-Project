@@ -1,6 +1,6 @@
 import re
 
-"""
+
 # Read file
 config_file = open('config.txt', 'r')
 
@@ -62,8 +62,8 @@ for config in configs:
 	t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
 print "Configurations: ", t_configs
-"""
-prefix = "22"
+
+prefix = "24"
 ip = "132.165.0.0"
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
@@ -74,6 +74,7 @@ for i in range(0,4):
 suffix = 32 - int(prefix)
 left = suffix%8
 nb_full_loops = suffix/8
+nb_loops = nb_full_loops
 
 if left != 0 :
     nb_loops = nb_full_loops + 1
@@ -109,9 +110,24 @@ for i in range(0, max_nb_loop[3]):
         oct[1] +=1
    
     oct[0] += 1
-    
-print list_ips
 
+target = []
+for ip in list_ips:
+    
+    config_ip = [ip]
+    for config in t_configs:
+        config_ip.extend(config)
+        target.append(config_ip)
+        config_ip = [ip]
+
+    
+    
+print target
+        
+        
+   
+        
+        
 
         
 
