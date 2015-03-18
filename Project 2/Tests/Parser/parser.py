@@ -63,14 +63,15 @@ for config in configs:
 
 print "Configurations: ", t_configs
 
-prefix = "24"
-ip = "132.165.0.0"
+# Retrieve the four octets
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
 
+# From String to int
 for i in range(0,4):
     list_int_ip[i] = int(list_ip[i]);
 
+# Compute the number of loops necessary
 suffix = 32 - int(prefix)
 left = suffix%8
 nb_full_loops = suffix/8
@@ -78,7 +79,8 @@ nb_loops = nb_full_loops
 
 if left != 0 :
     nb_loops = nb_full_loops + 1
-    
+
+# Compute the number of values to be added to each octet
 max_nb_loop = [1, 1, 1, 1]
 for i in range(0,4):
     
@@ -89,7 +91,7 @@ for i in range(0,4):
         max_nb_loop[i] = pow(2,left)
         
 list_ips = []
-
+# Generate the list of ip adresses in the domain
 oct = [list_int_ip[0], 0, 0, 0]
 for i in range(0, max_nb_loop[3]):
     
@@ -112,16 +114,17 @@ for i in range(0, max_nb_loop[3]):
     oct[0] += 1
 
 target = []
+# Generate every possible configuration
 for ip in list_ips:
     
     config_ip = [ip]
     for config in t_configs:
+        
         config_ip.extend(config)
         target.append(config_ip)
         config_ip = [ip]
 
-    
-    
+
 print target
         
         
