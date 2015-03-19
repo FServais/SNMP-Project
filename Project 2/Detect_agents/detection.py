@@ -3,6 +3,12 @@ from pysnmp.entity.rfc3413.oneliner import cmdgen
 from Queue import Queue
 from threading import Thread
 
+# =========================================== #
+#
+# Parsing
+# 
+# =========================================== #
+
 # Read file
 config_file = open('config.txt', 'r')
 
@@ -63,6 +69,7 @@ for config in configs:
 
     t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
+# Listing all the IP's in the range
 
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
@@ -110,6 +117,14 @@ for i in range(0, max_nb_loop[3]):
    
     oct[0] += 1
 
+
+# =========================================== #
+#
+# Generating list of the configutations 
+# (ip, port, version, sec_name, auth_protocol, auth_pwd, priv_protocol, priv_pwd )
+# 
+# =========================================== #
+
 targets = []
 for ip in list_ips:
     
@@ -118,12 +133,23 @@ for ip in list_ips:
         targets.append((ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
 
+# =========================================== #
+#
+# Detecting the agents 
+# 
+# =========================================== #
 
-
-agentsV1V2 = {}
+# List of detected agents
 agents = []
 
 
+# =========================================== #
+#
+# Classes to detect the agents (SNMPv3) 
+# 
+# =========================================== #
+
+# Process that detect if there is an agent corresponding to a configuration (in 'requests')
 class Worker(Thread):
     def __init__(self, requests, responses):
         Thread.__init__(self)
@@ -135,9 +161,12 @@ class Worker(Thread):
     
     def run(self):
         while True:
+            # Get a request = configuration
             target = self.requests.get()
+            # Fields of the configuration
             ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
             
+            # Choosing 
             authProtocol = None
             if auth_proto == "SHA":
                 authProtocol=cmdgen.usmHMACSHAAuthProtocol
@@ -182,7 +211,7 @@ class Worker(Thread):
                 self.requests.task_done()
 
             
-
+# Threadpool of processes aiming at the dection of an agent.
 class ThreadPool:
     def __init__(self, num_threads):
         self.requests = Queue(num_threads)
@@ -198,6 +227,36 @@ class ThreadPool:
     def waitCompletion(self): self.requests.join()
 
 
+# Function that tries to discover SNMPv3 agents from a list of configurations ('targets')
+# in a maximum number of threads 'numberOfThreads'.
+# This function sends synchronous requests, each one in a thread contained in a threadpool.
+def discoverTargetsV3(targets, numberOfThreads):
+    pool = ThreadPool(numberOfThreads)
+
+    for target in targets:
+        ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
+
+        if version != "3":
+            continue
+
+        pool.addRequest(target)
+        print target, " added to queue\n"
+
+    pool.waitCompletion()
+    print "Completed\n"
+
+
+# =========================================== #
+#
+# Functions to detect the agents (SNMPv1 & SNMPv2) 
+# 
+# =========================================== #
+
+# Hashtable to store agents : 
+# Entry: <ID of the (asynchronous) request , configuration>
+agentsV1V2 = {}
+
+
 # Callback function that removes the entry in the hashtable 'agent' if an
 # error has occured (typically timeout)
 def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex,
@@ -206,9 +265,8 @@ def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex
         del agentsV1V2[sendRequestHandle]
         return 1
 
-
 # Send asynchronous requests to a list of devices ('targets') following the form :
-# (ip, port, version, communityName).
+# (ip, port, version, communityName, None, None, None, None).
 # This function will populate the hashtable 'agentsV1V2' with the targets
 # that contains an agent.
 # Note: Only for SNMPv1 and SNMPv2.
@@ -218,9 +276,9 @@ def discoverTargets(targets):
     # Iterate through all targets
     for target in targets:
         # Get the differents values of the tuple
-        ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
+        ip, port, version, sec_name, _, _, _, _ = target
 
-        # authData depending on the version
+        # Check if not in version 3
         if version == "3":
             continue
 
@@ -253,68 +311,6 @@ def discoverTargets(targets):
 
 
 
-def discoverTargetsV3(targets):
-    pool = ThreadPool(10)
-
-    for target in targets:
-        ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = target
-
-        if version != "3":
-            continue
-
-        """
-        cmdGen = cmdgen.CommandGenerator()
-
-        authProtocol = None
-        if auth_proto == "SHA":
-            authProtocol=cmdgen.usmHMACSHAAuthProtocol
-        elif auth_proto == "MD5":
-            authProtocol=cmdgen.usmHMACMD5AuthProtocol
-        else:
-            authProtocol=cmdgen.usmNoAuthProtocol
-
-        privProtocol = None
-        if priv_proto == "DES":
-            privProtocol=cmdgen.usmDESPrivProtocol
-        elif priv_proto == "AES":
-            privProtocol=cmdgen.usmAesCfb128Protocol
-        else:
-            privProtocol=cmdgen.usmNoPrivProtocol
-
-        errorIndication, errorStatus, errorIndex, varBindTable = cmdGen.nextCmd(
-            cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
-                               authProtocol,
-                               privProtocol),
-            cmdgen.UdpTransportTarget((ip, int(port))),
-            ( '1.3.6.1.2.1' )
-        )
-
-        if not errorIndication and not errorStatus:
-            agents.append(target)
-        """
-        pool.addRequest(target)
-        print target, " added to queue\n"
-
-    pool.waitCompletion()
-    print "Completed\n"
-    """
-    # Walk through responses
-    for errorIndication, errorStatus, errorIndex, varBinds in pool.getResponses():
-        if errorIndication:
-            print(errorIndication)
-        if errorStatus:
-            print('%s at %s' % (
-                errorStatus.prettyPrint(),
-                errorIndex and varBinds[int(errorIndex)-1][0] or '?'
-                )
-            )
-        else:
-           agents.append(target)
-    """
-
-
-
-
 # =========================================== #
 #
 # Beginning of the detection part
@@ -326,7 +322,7 @@ def discoverTargetsV3(targets):
 #for k in agentsV1V2:
  #   agents.append(agentsV1V2[k])
 
-discoverTargetsV3(targets)
+discoverTargetsV3(targets, 15)
 
 for agent in agents:
     print agent, " -> OK!\n"
