@@ -365,21 +365,19 @@ def xmlWriter(agentsList):
 # 
 # =========================================== #
 
-while True:
-    # Asynchronous requests first
-    discoverTargets(targetsv1v2)
+# Asynchronous requests first
+discoverTargets(targetsv1v2)
 
-    for k in agentsV1V2:
-        agents.append(agentsV1V2[k])
+for k in agentsV1V2:
+    agents.append(agentsV1V2[k])
 
-    # Synchronous requests
-    discoverTargetsV3(targetsv3, 15)
+# Synchronous requests
+discoverTargetsV3(targetsv3, 15)
 
-    if not agents:
-        print "There is no agent."
-    else:
-        xmlWriter(agents)
+if not agents:
+    print "There is no agent."
+else:
+    xmlWriter(agents)
 
-    time.sleep(900)
 
 
