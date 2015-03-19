@@ -1,5 +1,6 @@
 import re
 import xml.etree.cElementTree as ET
+import time
 
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 from Queue import Queue
