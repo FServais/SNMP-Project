@@ -1,7 +1,9 @@
 import re
+import xml.etree.cElementTree as ET
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 from Queue import Queue
 from threading import Thread
+
 
 # =========================================== #
 #
@@ -125,12 +127,19 @@ for i in range(0, max_nb_loop[3]):
 # 
 # =========================================== #
 
-targets = []
+targetsv1v2 = []
+targetsv3 = []
+
 for ip in list_ips:
     
     for config in t_configs:
         port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
-        targets.append((ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
+
+        if(version == '3'):        
+            targetsv3.append((ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
+        else :
+            targetsv1v2.append((ip, port, version, sec_name, None, None, None, None))
+
 
 
 # =========================================== #
@@ -191,23 +200,12 @@ class Worker(Thread):
                         cmdgen.UdpTransportTarget((ip, int(port))),
                         '1.3.6.1.2.1.1.1.0'
                     )
-                if errorIndication:
-                    print target, " ??? -> ", errorIndication
-                else : 
-                    if errorStatus:
-                        print target, " ??? -> "
-                        print('%s at %s' % (
-                            errorStatus.prettyPrint(),
-                            errorIndex and varBinds[int(errorIndex)-1][0] or '?'
-                            )
-                        )
-                    else:
-                       agents.append(target)
+                if not errorIndication and not errorStatus:
+                    agents.append(target)
 
                 self.requests.task_done()
 
             except:
-                print "PySnmpError"
                 self.requests.task_done()
 
             
@@ -240,10 +238,8 @@ def discoverTargetsV3(targets, numberOfThreads):
             continue
 
         pool.addRequest(target)
-        print target, " added to queue\n"
 
     pool.waitCompletion()
-    print "Completed\n"
 
 
 # =========================================== #
@@ -252,10 +248,9 @@ def discoverTargetsV3(targets, numberOfThreads):
 # 
 # =========================================== #
 
-# Hashtable to store agents : 
+# Hashtable to store agents (SNMPv1 & SNMPv2) : 
 # Entry: <ID of the (asynchronous) request , configuration>
 agentsV1V2 = {}
-
 
 # Callback function that removes the entry in the hashtable 'agent' if an
 # error has occured (typically timeout)
@@ -272,7 +267,6 @@ def callbackFunction(sendRequestHandle, errorIndication, errorStatus, errorIndex
 # Note: Only for SNMPv1 and SNMPv2.
 def discoverTargets(targets):
     
-
     # Iterate through all targets
     for target in targets:
         # Get the differents values of the tuple
@@ -310,6 +304,40 @@ def discoverTargets(targets):
         del agentsV1V2[ret]
 
 
+# =========================================== #
+#
+# Save agents
+# 
+# =========================================== #
+    
+# Given a list of agents, write a XML file.
+def xmlWriter(agentsList):
+    
+    targets = ET.Element("targets")
+    
+    for i in agentsList:
+        
+        target = ET.SubElement(targets, "target")
+        
+        ip,port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = i
+        ET.SubElement(target, "ip", ).text = ip
+        ET.SubElement(target, "port",).text = port
+        ET.SubElement(target, "version", ).text = version
+        ET.SubElement(target, "sec_name", ).text = sec_name
+
+        if auth_proto != None:
+            ET.SubElement(target, "auth_proto", ).text = auth_proto
+        if auth_pwd != None:    
+            ET.SubElement(target, "auth_pwd", ).text = auth_pwd
+        if priv_proto != None:        
+            ET.SubElement(target, "priv_proto", ).text = priv_proto
+        if priv_pwd != None:
+            ET.SubElement(target, "priv_pwd", ).text = priv_pwd
+
+    tree = ET.ElementTree(targets)
+    tree.write("agents.xml")
+
+
 
 # =========================================== #
 #
@@ -317,13 +345,13 @@ def discoverTargets(targets):
 # 
 # =========================================== #
 
-#discoverTargets(targets)
+discoverTargets(targetsv1v2)
 
-#for k in agentsV1V2:
- #   agents.append(agentsV1V2[k])
+for k in agentsV1V2:
+    agents.append(agentsV1V2[k])
 
-discoverTargetsV3(targets, 15)
+discoverTargetsV3(targetsv3, 15)
 
-for agent in agents:
-    print agent, " -> OK!\n"
+xmlWriter(agents)
+
 

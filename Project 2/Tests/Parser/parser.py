@@ -1,5 +1,5 @@
 import re
-
+import xml.etree.ElementTree as ET
 
 # Read file
 config_file = open('config.txt', 'r')
@@ -63,14 +63,15 @@ for config in configs:
 
 print "Configurations: ", t_configs
 
-prefix = "24"
-ip = "132.165.0.0"
+# Retrieve the four octets
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
 
+# From String to int
 for i in range(0,4):
     list_int_ip[i] = int(list_ip[i]);
 
+# Compute the number of loops necessary
 suffix = 32 - int(prefix)
 left = suffix%8
 nb_full_loops = suffix/8
@@ -78,7 +79,8 @@ nb_loops = nb_full_loops
 
 if left != 0 :
     nb_loops = nb_full_loops + 1
-    
+
+# Compute the number of values to be added to each octet
 max_nb_loop = [1, 1, 1, 1]
 for i in range(0,4):
     
@@ -89,7 +91,7 @@ for i in range(0,4):
         max_nb_loop[i] = pow(2,left)
         
 list_ips = []
-
+# Generate the list of ip adresses in the domain
 oct = [list_int_ip[0], 0, 0, 0]
 for i in range(0, max_nb_loop[3]):
     
@@ -111,18 +113,45 @@ for i in range(0, max_nb_loop[3]):
    
     oct[0] += 1
 
-target = []
+targetsv1v2 = []
+targetsv3 = []
+# Generate every possible configuration
 for ip in list_ips:
-    
-    config_ip = [ip]
     for config in t_configs:
-        config_ip.extend(config)
-        target.append(config_ip)
-        config_ip = [ip]
+        port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
+        if(version == '3'):        
+            targetsv3.append((ip, port, version, sec_name,auth_proto, auth_pwd, priv_proto, priv_pwd))
+        else :
+            targetsv1v2.append((ip, port, version, sec_name))
 
+def XMLWriter(agentsList):
+    
+    targets = ET.Element("targets")
+    
+    for i in agentsList:
+        
+        target = ET.SubElement(targets, "target")
+        
+        ip,port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = i
+        ET.SubElement(target, "ip", ).text = ip
+        ET.SubElement(target, "port",).text = port
+        ET.SubElement(target, "version", ).text = version
+        ET.SubElement(target, "sec_name", ).text = sec_name
+        if auth_proto != None:
+            ET.SubElement(target, "auth_proto", ).text = auth_proto
+        if auth_pwd != None:    
+            ET.SubElement(target, "auth_pwd", ).text = auth_pwd
+        if priv_proto != None:        
+            ET.SubElement(target, "priv_proto", ).text = priv_proto
+        if priv_pwd != None:
+            ET.SubElement(target, "priv_pwd", ).text = priv_pwd
     
     
-print target
+    
+    
+    tree = ET.ElementTree(targets)
+    tree.write("filename.xml")
+    
         
         
    
