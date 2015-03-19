@@ -1,0 +1,2 @@
+# Detecting agant every 15 mintues
+*/15 * * * * python /home/nfs/nms01/Project2/detection.py
