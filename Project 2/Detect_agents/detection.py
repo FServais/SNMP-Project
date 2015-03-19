@@ -63,8 +63,7 @@ for config in configs:
 
     t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
-prefix = "24"
-ip = "132.165.0.0"
+
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
 
@@ -116,7 +115,13 @@ for ip in list_ips:
     
     for config in t_configs:
         port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = config
-        targets.append((ip, port, version, sec_name, None, None, None, None))
+        targets.append((ip, port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
+
+
+
+
+agentsV1V2 = {}
+agents = []
 
 
 class Worker(Thread):
@@ -149,16 +154,34 @@ class Worker(Thread):
             else:
                 privProtocol=cmdgen.usmNoPrivProtocol
 
-            self.responses.append(
-                self.cmdGen.getCmd(
-                    cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
-                                       authProtocol,
-                                       privProtocol),
-                    cmdgen.UdpTransportTarget((ip, int(port))),
-                    ( '1.3.6.1.2.1' )
-                )
-            )
-            self.requests.task_done()
+            try:
+                errorIndication, errorStatus, errorIndex, varBinds = self.cmdGen.getCmd(
+                        cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
+                                           authProtocol,
+                                           privProtocol),
+                        cmdgen.UdpTransportTarget((ip, int(port))),
+                        '1.3.6.1.2.1.1.1.0'
+                    )
+                if errorIndication:
+                    print target, " ??? -> ", errorIndication
+                else : 
+                    if errorStatus:
+                        print target, " ??? -> "
+                        print('%s at %s' % (
+                            errorStatus.prettyPrint(),
+                            errorIndex and varBinds[int(errorIndex)-1][0] or '?'
+                            )
+                        )
+                    else:
+                       agents.append(target)
+
+                self.requests.task_done()
+
+            except:
+                print "PySnmpError"
+                self.requests.task_done()
+
+            
 
 class ThreadPool:
     def __init__(self, num_threads):
@@ -174,9 +197,6 @@ class ThreadPool:
 
     def waitCompletion(self): self.requests.join()
 
-
-agentsV1V2 = {}
-agents = []
 
 # Callback function that removes the entry in the hashtable 'agent' if an
 # error has occured (typically timeout)
@@ -226,7 +246,10 @@ def discoverTargets(targets):
 
         agentsV1V2[ret] = target
 
-    cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+    try:
+        cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+    except:
+        del agentsV1V2[ret]
 
 
 
@@ -270,13 +293,24 @@ def discoverTargetsV3(targets):
             agents.append(target)
         """
         pool.addRequest(target)
+        print target, " added to queue\n"
 
     pool.waitCompletion()
-
+    print "Completed\n"
+    """
     # Walk through responses
     for errorIndication, errorStatus, errorIndex, varBinds in pool.getResponses():
-        if not errorIndication and not errorStatus:
+        if errorIndication:
+            print(errorIndication)
+        if errorStatus:
+            print('%s at %s' % (
+                errorStatus.prettyPrint(),
+                errorIndex and varBinds[int(errorIndex)-1][0] or '?'
+                )
+            )
+        else:
            agents.append(target)
+    """
 
 
 
@@ -294,9 +328,6 @@ def discoverTargetsV3(targets):
 
 discoverTargetsV3(targets)
 
-
-
-
 for agent in agents:
-    print agent,
+    print agent, " -> OK!\n"
 
