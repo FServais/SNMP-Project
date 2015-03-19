@@ -62,7 +62,8 @@ for config in configs:
 	t_configs.append((port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd))
 
 print "Configurations: ", t_configs
-
+ip = "0.0.0.0"
+prefix = "24"
 # Retrieve the four octets
 list_ip = ip.split(".", 4)
 list_int_ip = [0, 0, 0, 0]
@@ -150,11 +151,11 @@ def XMLWriter(agentsList):
     
     
     tree = ET.ElementTree(targets)
-    tree.write("filename.xml")
+    tree.write("test.xml")
     
         
         
-   
+XMLWriter(targetsv3)
         
         
 
