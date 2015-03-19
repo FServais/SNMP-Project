@@ -1,5 +1,6 @@
 import re
 import xml.etree.cElementTree as ET
+
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 from Queue import Queue
 from threading import Thread
@@ -78,6 +79,25 @@ list_int_ip = [0, 0, 0, 0]
 
 for i in range(0,4):
     list_int_ip[i] = int(list_ip[i]);
+
+# Create mask
+
+numBytesTo255 = int(prefix)/8
+numBitsLastBytes = int(prefix)%8
+
+
+mask = [0, 0 ,0 ,0]
+
+for i in range(0,numBytesTo255):
+    mask[i] = 255
+
+for j in range(0, numBitsLastBytes):
+    mask[numBytesTo255] += 2**(7-j)
+
+# Apply mask
+for i in range(0,4):
+    list_int_ip[i] &= mask[i]
+
 
 suffix = 32 - int(prefix)
 left = suffix%8
@@ -193,12 +213,12 @@ class Worker(Thread):
                 privProtocol=cmdgen.usmNoPrivProtocol
 
             try:
-                errorIndication, errorStatus, errorIndex, varBinds = self.cmdGen.getCmd(
+                errorIndication, errorStatus, errorIndex, varBinds = self.cmdGen.nextCmd(
                         cmdgen.UsmUserData(sec_name, auth_pwd, priv_pwd,
                                            authProtocol,
                                            privProtocol),
                         cmdgen.UdpTransportTarget((ip, int(port))),
-                        '1.3.6.1.2.1.1.1.0'
+                        '1.3.6.1'
                     )
                 if not errorIndication and not errorStatus:
                     agents.append(target)
@@ -285,7 +305,7 @@ def discoverTargets(targets):
             authData = cmdgen.CommunityData(sec_name)
 
         transportTarget = cmdgen.UdpTransportTarget((ip, int(port)))
-        var = ( '1.3.6.1.2.1', )
+        var = ( '1.3.6.1', )
 
         # Make and send request
         ret = cmdGen.nextCmd(
@@ -338,20 +358,27 @@ def xmlWriter(agentsList):
     tree.write("agents.xml")
 
 
-
 # =========================================== #
 #
 # Beginning of the detection part
 # 
 # =========================================== #
 
-discoverTargets(targetsv1v2)
+while True:
+    # Asynchronous requests first
+    discoverTargets(targetsv1v2)
 
-for k in agentsV1V2:
-    agents.append(agentsV1V2[k])
+    for k in agentsV1V2:
+        agents.append(agentsV1V2[k])
 
-discoverTargetsV3(targetsv3, 15)
+    # Synchronous requests
+    discoverTargetsV3(targetsv3, 15)
 
-xmlWriter(agents)
+    if not agents:
+        print "There is no agent."
+    else:
+        xmlWriter(agents)
+
+    time.sleep(900)
 
 
