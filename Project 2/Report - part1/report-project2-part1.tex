@@ -76,7 +76,7 @@ First we generated a list of all the targets possible : for each ip adress in th
 
 	\subsection{SNMPv3}
 	As the asynchronous requests did not work with the library we use, we decided to launch treads and use the synchronous requests of the library. 
-	For that we use a pool of 15 threads.  We used the same request as in the previous case. 
+	For that we use a pool of 15 threads.  We used the same request as in the previous case. We tried to use a suitable number of threads to make  	    the detection as fast as possible and to avoid overloading the machine or the network.
 
 
 
