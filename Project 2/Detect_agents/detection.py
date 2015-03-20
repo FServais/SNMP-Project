@@ -14,7 +14,7 @@ from threading import Thread
 # =========================================== #
 
 # Read file
-config_file = open('config.txt', 'r')
+config_file = open('/home/nfs/nms01/Project2/config.txt', 'r')
 
 ip = config_file.readline()
 configs = []
@@ -356,7 +356,7 @@ def xmlWriter(agentsList):
             ET.SubElement(target, "priv_pwd", ).text = priv_pwd
 
     tree = ET.ElementTree(targets)
-    tree.write("agents.xml")
+    tree.write("/home/nfs/nms01/Project2/agents.xml")
 
 
 # =========================================== #
