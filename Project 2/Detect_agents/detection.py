@@ -99,7 +99,7 @@ for j in range(0, numBitsLastBytes):
 for i in range(0,4):
     list_int_ip[i] &= mask[i]
 
-
+# Generate IP's
 suffix = 32 - int(prefix)
 left = suffix%8
 nb_full_loops = suffix/8

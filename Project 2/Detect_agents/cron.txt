@@ -1,2 +1,2 @@
 # Detecting agent every 15 minutes
-*/15 * * * * /usr/bin/python /home/nfs/nms01/Project2/detection.py > /home/nfs/nms01/Project2/results.txt
+*/15 * * * * /usr/bin/python /home/nfs/nms01/Project2/detection.py
