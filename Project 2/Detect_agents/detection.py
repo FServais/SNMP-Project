@@ -1,11 +1,9 @@
 import re
 import xml.etree.cElementTree as ET
-import time
 
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 from Queue import Queue
 from threading import Thread
-
 
 # =========================================== #
 #
@@ -378,6 +376,4 @@ if not agents:
     print "There is no agent."
 else:
     xmlWriter(agents)
-
-
 
