@@ -373,7 +373,7 @@ for k in agentsV1V2:
 discoverTargetsV3(targetsv3, 15)
 
 if not agents:
-    print "There is no agent."
+    print("There is no agent.")
 else:
     xmlWriter(agents)
 
