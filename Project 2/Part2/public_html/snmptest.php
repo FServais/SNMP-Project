@@ -138,7 +138,7 @@
 	    echo "$i: $a[$i]<br />\n";
 	}
 	*/
-
+	/*
 	$oids = array("1.1.1.1.1" => "a",
 				  "1.1.1.1.1.3" => "b",
 				  "1.1.1.2.1" => "c",
@@ -154,5 +154,16 @@
 	echo "<pre>";
 	print_r($tree);
 	echo "</pre>"
+	*/
+
+	include_once("model/sqlite_connection.php");
+
+	$db = sqlite_connect();
+
+	$oids = get_mib_list($db);
+	$tree = explodeTree($oids, '.', false);
+	echo "<pre>";
+	print_r($tree);
+	echo "</pre>";
 
  ?>
