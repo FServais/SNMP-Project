@@ -138,4 +138,33 @@
 		$db->query('UPDATE agentstimeout SET agents_last_refresh = datetime("now", "+2 hours")'); // "+2 hours" due to configuration problem on sqlite
 	}
 
+
+	function get_mib_list($db)
+	{
+		$oids = get_oids("hawk.run.montefiore.ulg.ac.be", "run69Zork!", 1);
+
+		return $oids;
+	}
+
+
+	function get_oids($ip, $community, $version)
+	{
+		snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
+		if($version == 1)
+			$walk = snmprealwalk($ip, $community, "");
+		if($version == 2)
+			$walk = snmp2_real_walk($ip, $community, "");
+		if($version == 3)
+			$walk = snmp3_real_walk($ip, $community, "");
+
+		$oids = array();
+		foreach ($walk as $oid => $value) 
+		{
+			$oid = substr($oid, 1);
+			$oids[$oid] = "";
+		}
+		
+		return $oids;
+	}
+
  ?>
