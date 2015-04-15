@@ -154,7 +154,7 @@
 	 */
 	function refresh_oids($oids, $ip, $port, $version, $secname, $db)
 	{
-		$db->query('DELETE FROM oidnode');
+		$db->query('DELETE FROM oidnode WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($secname) . '"');
 
 		$query = 'BEGIN TRANSACTION; ';
 		foreach ($oids as $oid => $value)
