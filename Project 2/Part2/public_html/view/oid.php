@@ -7,54 +7,51 @@
 </head>
 
 <body>
-	<h1> Agents present in the network </h1>
-	Miseeere
+	
 	<?php 
 
-		echo 'oid view';
-		if(isset($_GET['oid']))
-		{
-			$oid = $_GET['oid'];
-			$levels = explode('.', $oid);
+		echo '<h1> Oid tree for the agent '.$_GET['ip'].' </h1>';
 
-			/*if(is_leaf($oid))
+	
+
+		echo '<div id="tree">'; 
+
+			if(isset($_GET['oid']))
 			{
-				include_once('controller/oidvalue');
-				//echo '<a href="index.php?page=oidvalue&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
-				 //. '&secname=' . $_GET["secname"] . '&oid='.$oid.'"> '.$oid.' </a> </br>'; 
-			}
+				$oid = $_GET['oid'];
 
-			*/
+				$levels = explode('.', $oid);
+
 			
-			else
-			{
 				$oid_lvl = '';
 				$space = 0;
 				$oid_subtree = $oids;
 				
 				foreach($levels as $level)
 				{
-					$oid_lvl = $oid_lvl.'.'.$level;
+					if(strlen($oid_lvl != 0))
+						$oid_lvl = $oid_lvl.'.'.$level;
+					else
+						$oid_lvl = $level;
+
 					$oid_subtree = $oid_subtree[$level];
-					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
-				 	. '&secname=' . $_GET["secname"] . '&oid='.$oid_lvl.'"> '.$oid_lvl.' </a> </br>';
+					echo str_repeat(' -- ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid='.$oid_lvl.'"> '.$oid_lvl.' </a> </br>';
 				 	$space++;
 				}
-
 				foreach($oid_subtree as $key => $value)
 				{
-					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
+					echo str_repeat(' -- ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"]
 				 	. '&secname=' . $_GET["secname"] . '&oid='.$oid.'.'.$key.'"> '.$oid.'.'.$key.' </a> </br>'; 
 				}
-			}	
-			
-		}
-		else 
-		{
-			echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid=1"> 
-			1 </a> </br>'; 
-		}
-
+		
+				
+			}
+			else 
+			{
+				echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid=1"> 
+				1 </a> </br>'; 
+			}
+			echo '</div>';
 	?>
 
 </body>

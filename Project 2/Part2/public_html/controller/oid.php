@@ -8,27 +8,44 @@
 	if(isset($_GET['ip']) AND isset($_GET['port']) AND isset($_GET['version']) AND isset($_GET['secname']))
 	{
 		$db = sqlite_connect();
-		$agents_array = get_agents($db, false);
-		$agent = findAgentV3($agents_array, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
+		$agents = get_agents($db, false);
+		$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
 
 		
-		echo $agent['ip'].$agent['port'];
 		if($agent['version'] == 3)
-			$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'], $_GET['secname'],
-			 $agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
+			$oids = get_mib_list($db, false, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname'],
+			$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
 
 		else
-			$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'] , $_GET['secname'], "", "", "", "");
-		
-		if(count($oids) == 0)
+			$oids = get_mib_list($db, false, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);
+		if(isset($_GET['oid']))
 		{
-			include_once('view/oid.php');
+			$oid = $_GET['oid'];
+			$levels = explode('.', $oid);
+			$sub = $oids;
+			foreach ($levels as $level)
+			{
+				$sub = $sub[$level];
+			}
+
+			if(empty($sub))
+			{
+				if($agent['version'] == 3)
+					$value = get_oid_value($_GET['oid'],  $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname'],
+				 					$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
+
+				else
+					$value = get_oid_value($_GET['oid'],  $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);
+				
+				include_once('view/oidvalue.php');
+			}
+			else
+				include_once('view/oid.php');
 		}
-			
+		
 		else
 			include_once('view/oid.php');
-
-		echo 'coucou je viens de la vue';
+	
 
 	}
 	else{
