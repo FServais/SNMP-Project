@@ -54,13 +54,9 @@
 	function get_mib_list($db, $force_refresh, $ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
 	{
 		$oids = array();
-
 		// Check timeout of the cache
 		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($community) . '" AND strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
-		echo "Timeout : ";
-		print_r($timeout);
-		echo "<br>";
 
 		if ($force_refresh || !timeout_exists($ip, $port, $version, $community, $db) || $timeout[0] == 1) 
 		{
