@@ -2,10 +2,11 @@
 
 	/**
 	 * Get the SNMP agents. 
-	 * @param  SQLite3 $db Database connection
-	 * @return Array       List of the agents
+	 * @param  SQLite3 $db 			   Database connection
+	 * @param  bool    $force_refresh  Boolean that tell if the cache is forced to be refreshed.
+	 * @return Array                   List of the agents
 	 */
-	function get_agents($db)
+	function get_agents($db, $force_refresh)
 	{
 		$agents = array();
 
@@ -13,15 +14,12 @@
 		$timeout_result = $db->query('SELECT 1 FROM agentstimeout WHERE strftime("%s", "now") - strftime("%s", agents_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
-		if ($timeout[0] == 1) 
+		if ($force_refresh || $timeout[0] == 1) 
 		{
-			echo "Refreshing...";
 			$agents_file = load_agents('agents.xml');
 			refresh_agents($agents_file, $db);
 			update_agents_timeout($db);
 		}
-		else
-			echo "Not refreshing.";
 
 		$results = $db->query('SELECT ip, port, version, secname FROM agent WHERE version=1 OR version=2');
 		
