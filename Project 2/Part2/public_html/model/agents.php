@@ -16,13 +16,13 @@
 
 		if ($force_refresh || !timeout_agents_exists($db) || $timeout[0] == 1) 
 		{
-			echo "Refresh...";
+			echo "Refresh agents...";
 			$agents_file = load_agents('agents.xml');
 			refresh_agents($agents_file, $db);
 			update_agents_timeout($db);
 		}
 		else
-			echo "Not refreshing...";
+			echo "Not refreshing agents...";
 
 		$results = $db->query('SELECT ip, port, version, secname FROM agent WHERE version=1 OR version=2');
 		

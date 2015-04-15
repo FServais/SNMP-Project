@@ -60,7 +60,7 @@
 
 		if ($force_refresh || !timeout_exists($ip, $port, $version, $community, $db) || $timeout[0] == 1) 
 		{
-			echo "Refresh";
+			echo "Refresh <br>";
 			
 			if($version == 3)
 				$oids_raw = get_oids($ip, $port, $version, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd);
