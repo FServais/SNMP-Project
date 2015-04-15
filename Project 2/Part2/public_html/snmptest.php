@@ -72,9 +72,16 @@
 	$db = sqlite_connect();
 
 	echo "test : <br>";
+	/*
 	$agents = get_agents($db, false);
 	echo "<pre>";
 	print_r($agents);
+	echo "</pre>";
+	*/
+
+	$oids = get_mib_list($db, false, "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
+	echo "<pre>";
+	print_r($oids);
 	echo "</pre>"
 
 	//$agents = get_agents($db,false);
