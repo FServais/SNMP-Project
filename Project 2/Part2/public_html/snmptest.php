@@ -86,6 +86,13 @@
 	*/
 	//$agents = get_agents($db,false);
 	$oid = get_oid_value("1.3.6.1.2.1.1.1.0", "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
-	echo $oid;
+	echo $oid . "<br>";
+
+	$test = "";
+	if(is_null($test))
+		echo "ISSET";
+	else
+		echo "NOT ISSET";
+
 
  ?>
