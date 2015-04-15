@@ -1,11 +1,19 @@
 <?php 
-	
-	function get_mib_list($ip, $port, $community, $version, $db)
+	/**
+	 * Get the tree-structured array containing the oids of the agent.
+	 * @param  string  $ip        IP of the agent.
+	 * @param  int     $port      Port of the agent.
+	 * @param  int     $version   Version of the agent.
+	 * @param  string  $community Community name of the agent.
+	 * @param  SQLite3 $db        Connection to the database.
+	 * @return array              Tree-structured arrays containing the oids.
+	 */
+	function get_mib_list($ip, $port, $version, $community, $db)
 	{
 		$oids = array();
 
 		// Check timeout of the cache
-		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE strftime("%s", "now") - strftime("%s", oids_last_refresh) < ' . 2 * 60 * 60);
+		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
 		if ($timeout[0] == 1) 
