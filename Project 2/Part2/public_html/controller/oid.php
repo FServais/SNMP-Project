@@ -13,15 +13,14 @@
 
 		if(in_array($agent, $agents))
 		{
-			echo $agent['ip'].$agent['port'];
+			echo $agent['ip'].':'.$agent['port'].'<br>';
 			if($agent['version'] == 3)
-				$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'], $_GET['secname'],
+				$oids = get_mib_list($db, false, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname'],
 				 $agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
 
 			else
-				$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'] , $_GET['secname'], "", "", "", "");
+				$oids = get_mib_list($db, true, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);
 			
-			echo count($oids);
 			include_once('view/oid.php');
 			echo 'coucou je viens de la vue';
 		}
