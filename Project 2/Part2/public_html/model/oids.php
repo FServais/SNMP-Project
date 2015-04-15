@@ -1,4 +1,40 @@
 <?php 
+	
+	/**
+	 * Get the value of a certain OID, for a given agent.
+	 * @param  string  $oid            OID to look for.
+	 * @param  string  $ip             IP of the agent.
+	 * @param  int     $port           Port of the agent.
+	 * @param  int     $version        Version of the agent.
+	 * @param  string  $community      Community name of the agent.
+	 * @param  string  $auth_proto     Authentication protocol (SNMPv3)
+	 * @param  string  $auth_pwd       Authentication password (SNMPv3)
+	 * @param  string  $priv_proto     Private protocol (SNMPv3)
+	 * @param  string  $priv_pwd       Private password (SNMPv3)
+	 * @return string  				   Value of the OID.
+	 */
+	function get_oid_value($oid, $ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
+	{
+		if($version == 1)
+			return snmpget($ip.':'.$port, $community, $oid);
+		elseif($version == 2)
+			return snmp2_get($ip.':'.$port, $community, $oid);
+		elseif($version == 3)
+		{
+			if(isset($auth_proto))
+			{
+				if(isset($priv_proto))
+					return snmp3_get($ip.':'.$port, $community, 'authPriv', $auth_proto, $auth_pwd, $priv_proto, $priv_pwd,  $oid);
+				else
+					return snmp3_get($ip.':'.$port, $community, 'authNoPriv', $auth_proto, $auth_pwd, "", "",  $oid);
+			}
+			else
+				return snmp3_get($ip.':'.$port, $community, 'noAuthNoPriv', "", "", "", "",  $oid);
+		}	
+
+		return null;
+	}
+
 	/**
 	 * Get the tree-structured array containing the oids of the agent.
 	 * @param  SQLite3 $db             Connection to the database.
