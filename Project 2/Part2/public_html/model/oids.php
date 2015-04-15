@@ -77,7 +77,7 @@
 		}
 		
 		$oids = explodeTree($oids_raw, '.', false);
-		
+		echo 'taille'.count($oids);
 		return $oids;
 	}
 
