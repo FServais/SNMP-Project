@@ -21,15 +21,17 @@
 			return snmp2_get($ip.':'.$port, $community, $oid);
 		elseif($version == 3)
 		{
-			if(isset($auth_proto))
+			if(is_null($auth_proto))
 			{
-				if(isset($priv_proto))
-					return snmp3_get($ip.':'.$port, $community, 'authPriv', $auth_proto, $auth_pwd, $priv_proto, $priv_pwd,  $oid);
+				if(is_null($priv_proto))
+					$seclevel = 'authPriv';
 				else
-					return snmp3_get($ip.':'.$port, $community, 'authNoPriv', $auth_proto, $auth_pwd, "", "",  $oid);
+					$seclevel = 'authNoPriv';
 			}
 			else
-				return snmp3_get($ip.':'.$port, $community, 'noAuthNoPriv', "", "", "", "",  $oid);
+				$seclevel = 'noAuthNoPriv';
+
+			return snmp3_get($ip.':'.$port, $community, $seclevel, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd,  $oid);
 		}	
 
 		return null;
@@ -123,12 +125,22 @@
 		}
 		elseif($version == 3)
 		{
-			$oid = @snmp3_getnext($ip, $community, [".1"]);
+			if(is_null($auth_proto))
+			{
+				if(is_null($priv_proto))
+					$seclevel = 'authPriv';
+				else
+					$seclevel = 'authNoPriv';
+			}
+			else
+				$seclevel = 'noAuthNoPriv';
+
+			$oid = @snmp3_getnext($ip, $community, $seclevel, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd, [".1"]);
 			
 			while($oid)
 			{
 				$oids[substr(key($oid),1)] = "";
-				$oid = snmp3_getnext($ip, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd, [key($oid)]);
+				$oid = snmp3_getnext($ip, $community, $seclevel, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd, [key($oid)]);
 			}
 		}
 		
