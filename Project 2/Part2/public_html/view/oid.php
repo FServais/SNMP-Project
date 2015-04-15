@@ -1,4 +1,3 @@
-//mib display
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="fr">
 <head>
@@ -9,27 +8,30 @@
 
 <body>
 	<h1> Agents present in the network </h1>
-
+	Miseeere
 	<?php 
 
+		echo 'oid view';
 		if(isset($_GET['oid']))
 		{
 			$oid = $_GET['oid'];
 			$levels = explode('.', $oid);
 
-			if(is_leaf($oid))
+			/*if(is_leaf($oid))
 			{
-				include_once(controller/oidvalue);
+				include_once('controller/oidvalue');
 				//echo '<a href="index.php?page=oidvalue&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
 				 //. '&secname=' . $_GET["secname"] . '&oid='.$oid.'"> '.$oid.' </a> </br>'; 
 			}
 
-			
+			*/
 			
 			else
 			{
 				$oid_lvl = '';
 				$space = 0;
+				$oid_subtree = $oids;
+				
 				foreach($levels as $level)
 				{
 					$oid_lvl = $oid_lvl.'.'.$level;
