@@ -8,23 +8,27 @@
 	if(isset($_GET['ip']) AND isset($_GET['port']) AND isset($_GET['version']) AND isset($_GET['secname']))
 	{
 		$db = sqlite_connect();
-		$agents = get_agents($db, false);
-		$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
+		$agents_array = get_agents($db, false);
+		$agent = findAgentV3($agents_array, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
 
-		if(in_array($agent, $agents))
+		
+		echo $agent['ip'].$agent['port'];
+		if($agent['version'] == 3)
+			$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'], $_GET['secname'],
+			 $agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
+
+		else
+			$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'] , $_GET['secname'], "", "", "", "");
+		
+		if(count($oids) == 0)
 		{
-			echo $agent['ip'].$agent['port'];
-			if($agent['version'] == 3)
-				$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'], $_GET['secname'],
-				 $agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
-
-			else
-				$oids = get_mib_list($db, false, $_GET['ip'],  $_GET['port'], $_GET['version'] , $_GET['secname'], "", "", "", "");
-			
-			echo count($oids);
 			include_once('view/oid.php');
-			echo 'coucou je viens de la vue';
 		}
+			
+		else
+			include_once('view/oid.php');
+
+		echo 'coucou je viens de la vue';
 
 	}
 	else{
