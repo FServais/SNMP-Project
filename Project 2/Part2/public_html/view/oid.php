@@ -25,9 +25,8 @@
 			}
 
 			*/
-			
-			else
-			{
+			//else
+			//{
 				$oid_lvl = '';
 				$space = 0;
 				$oid_subtree = $oids;
@@ -36,22 +35,21 @@
 				{
 					$oid_lvl = $oid_lvl.'.'.$level;
 					$oid_subtree = $oid_subtree[$level];
-					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
-				 	. '&secname=' . $_GET["secname"] . '&oid='.$oid_lvl.'"> '.$oid_lvl.' </a> </br>';
+					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid='.$oid_lvl.'"> '.$oid_lvl.' </a> </br>';
 				 	$space++;
 				}
 
 				foreach($oid_subtree as $key => $value)
 				{
-					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"]
+					echo str_repeat('  ', $space) . '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"]
 				 	. '&secname=' . $_GET["secname"] . '&oid='.$oid.'.'.$key.'"> '.$oid.'.'.$key.' </a> </br>'; 
 				}
-			}	
+			//}	
 			
 		}
 		else 
 		{
-			echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET[^"port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid=1"> 
+			echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&oid=1"> 
 			1 </a> </br>'; 
 		}
 

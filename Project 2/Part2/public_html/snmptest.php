@@ -1,15 +1,18 @@
 <?php 
 	error_reporting(E_ALL);
 
-	/*
+	
 	ini_set('display_errors', 1);
-	snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
-	$a = snmpwalkoid("hawk.run.montefiore.ulg.ac.be", "run69Zork!", "");
+	//snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
+	$a = snmp2_get("hawk.run.montefiore.ulg.ac.be", "run69Zork!", "1.2.1");
+
+	if(empty($a))
+		echo "Null";
 
 	echo "<pre>";
 	print_r($a);
 	echo "</pre>";
-	*/
+	
 	/*
 	foreach ($a as $val) {
 	    echo "$val\n";
@@ -64,7 +67,7 @@
 	print_r($tree);
 	echo "</pre>"
 	*/
-	
+	/*
 	include_once("model/sqlite_connection.php");
 	include_once("model/agents.php");
 	include_once("model/oids.php");
@@ -72,19 +75,19 @@
 	$db = sqlite_connect();
 
 	echo "test : <br>";
-	
+	*/
 	/*
 	$agents = get_agents($db, false);
 	echo "<pre>";
 	print_r($agents);
 	echo "</pre>";
 	*/
-	
+	/*
 	$oids = get_mib_list($db, true, "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
 	echo "<pre>";
 	print_r($oids);
 	echo "</pre>"
-	
+	*/
 	//$agents = get_agents($db,false);
 	/*
 	$oid = get_oid_value("1.3.6.1.2.1.1.1.0", "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");

@@ -19,7 +19,7 @@
 				 $agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
 
 			else
-				$oids = get_mib_list($db, true, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);
+				$oids = get_mib_list($db, false, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);
 			
 			include_once('view/oid.php');
 			echo 'coucou je viens de la vue';
