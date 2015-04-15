@@ -66,16 +66,18 @@
 	*/
 	
 	include_once("model/sqlite_connection.php");
+	include_once("model/agents.php");
 	include_once("model/oids.php");
 
 	$db = sqlite_connect();
 
-	$oids = get_mib_list($db, "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
-	$tree = explodeTree($oids, '.', false);
+	echo "test : <br>";
+	$agents = get_agents($db, false);
 	echo "<pre>";
-	print_r($tree);
-	echo "</pre>";
+	print_r($agents);
+	echo "</pre>"
 
+	//$agents = get_agents($db,false);
 	
 
  ?>
