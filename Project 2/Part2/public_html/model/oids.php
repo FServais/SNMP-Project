@@ -20,23 +20,27 @@
 		// Check timeout of the cache
 		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($community) . '" AND strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
+		echo "Timeout : ";
+		print_r($timeout);
+		echo "<br>";
 
-		if ($force_refresh || $timeout[0] == 1) 
+		if ($force_refresh || !timeout_exists($ip, $port, $version, $community, $db) || $timeout[0] == 1) 
 		{
+			echo "Refresh";
+			
 			if($version == 3)
 				$oids_raw = get_oids($ip, $port, $version, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd);
 			else
 				$oids_raw = get_oids($ip, $port, $version, $community);
 
-			echo "OIDs are got.";
-
 			refresh_oids($oids_raw, $ip, $port, $version, $community, $db);
-			echo "Refreshing DB done.";
 			update_oids_timeout($ip, $port, $version, $community, $db);		
-			echo "Timeout updated";	
+			
 		}
-		else
+		else{
+			echo "not refresh";
 			$oids_raw = get_oids_db($ip, $port, $version, $community, $db);
+		}
 		
 		$oids = explodeTree($oids_raw, '.', false);
 		
@@ -101,11 +105,13 @@
 	 * @param  string  $ip         IP of the agent.
 	 * @param  int     $port       Port of the agent.
 	 * @param  int     $version    Version of the agent.
-	 * @param  string  $community  Community name of the agent.
+	 * @param  string  $secname    Community name of the agent.
 	 * @param  SQLite3 $db         Connection to the database.
 	 */
 	function refresh_oids($oids, $ip, $port, $version, $secname, $db)
 	{
+		$db->query('DELETE FROM oidnode');
+
 		$query = 'BEGIN TRANSACTION; ';
 		foreach ($oids as $oid => $value)
 			$query .= 'INSERT INTO oidnode (ip, port, version, secname, oid) VALUES ("' . SQLite3::escapeString($ip) . '", ' . $port . ', ' . $version . ', "' . SQLite3::escapeString($secname) . '", "' . SQLite3::escapeString($oid) . '");';
@@ -120,7 +126,7 @@
 	 * @param  string  $ip         IP of the agent.
 	 * @param  int     $port       Port of the agent.
 	 * @param  int     $version    Version of the agent.
-	 * @param  string  $community  Community name of the agent.
+	 * @param  string  $secname    Community name of the agent.
 	 * @param  SQLite3 $db         Connection to the database.
 	 */
 	function update_oids_timeout($ip, $port, $version, $secname, $db)
@@ -133,7 +139,7 @@
 	 * @param  string  $ip         IP of the agent.
 	 * @param  int     $port       Port of the agent.
 	 * @param  int     $version    Version of the agent.
-	 * @param  string  $community  Community name of the agent.
+	 * @param  string  $secname    Community name of the agent.
 	 * @param  SQLite3 $db         Connection to the database.
 	 * @return array               Array where the keys are the OIDs.
 	 */
@@ -146,6 +152,22 @@
 			$oids[$row['oid']] = "";
 
 		return $oids;
+	}
+
+	/**
+	 * Check if there exists a value of the timeout in the cache.
+	 * @param  string  $ip         IP of the agent.
+	 * @param  int     $port       Port of the agent.
+	 * @param  int     $version    Version of the agent.
+	 * @param  string  $secname    Community name of the agent.
+	 * @param  SQLite3 $db Database connection.
+	 * @return bool        Returns true if there exists a "last refresh value", false otherwise.
+	 */
+	function timeout_exists($ip, $port, $version, $secname, $db)
+	{
+		$result = $db->query('SELECT COUNT(oids_last_refresh) FROM oidstimeout WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($secname) . '"');
+		$result = $result->fetchArray();
+		return ($result[0]>0);
 	}
 
 	/**
