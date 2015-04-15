@@ -21,7 +21,7 @@
 	    echo "$i: $a[$i]<br />\n";
 	}
 	*/
-	
+	/*
 	ini_set('display_errors', 1);
 	snmp_set_valueretrieval( SNMP_VALUE_OBJECT | SNMP_VALUE_PLAIN );
 	
@@ -36,7 +36,7 @@
 		echo '<br>';
 		$oid = snmp2_getnext("139.165.222.253", "public!", [key($oid)]);
 	}
-	
+	*/
 	
 	/*
 	include_once('model/sqlite_connection.php');
@@ -64,7 +64,7 @@
 	print_r($tree);
 	echo "</pre>"
 	*/
-	/*
+	
 	include_once("model/sqlite_connection.php");
 	include_once("model/agents.php");
 	include_once("model/oids.php");
@@ -72,19 +72,19 @@
 	$db = sqlite_connect();
 
 	echo "test : <br>";
-	*/
+	
 	/*
 	$agents = get_agents($db, false);
 	echo "<pre>";
 	print_r($agents);
 	echo "</pre>";
 	*/
-	/*
+	
 	$oids = get_mib_list($db, true, "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
 	echo "<pre>";
 	print_r($oids);
 	echo "</pre>"
-	*/
+	
 	//$agents = get_agents($db,false);
 	/*
 	$oid = get_oid_value("1.3.6.1.2.1.1.1.0", "hawk.run.montefiore.ulg.ac.be", 161, 1, "run69Zork!");
