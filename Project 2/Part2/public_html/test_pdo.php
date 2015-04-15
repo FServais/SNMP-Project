@@ -14,9 +14,9 @@
 	include_once('model/sqlite_connection.php');
 	$db = sqlite_connect();
 
-	$agents = get_agents($db);
+	$oids = get_mib_list("hawk.run.montefiore.ulg.ac.be", "run69Zork!", 1, $db);
 	echo "<pre>";
-	print_r($agents);
+	print_r($oids);
 	echo "</pre>";
 
  ?>
