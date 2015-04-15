@@ -14,12 +14,15 @@
 		$timeout_result = $db->query('SELECT 1 FROM agentstimeout WHERE strftime("%s", "now") - strftime("%s", agents_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
-		if ($force_refresh || $timeout[0] == 1) 
+		if ($force_refresh || !timeout_agents_exists($db) || $timeout[0] == 1) 
 		{
+			echo "Refresh...";
 			$agents_file = load_agents('agents.xml');
 			refresh_agents($agents_file, $db);
 			update_agents_timeout($db);
 		}
+		else
+			echo "Not refreshing...";
 
 		$results = $db->query('SELECT ip, port, version, secname FROM agent WHERE version=1 OR version=2');
 		
@@ -102,6 +105,9 @@
 	 */
 	function refresh_agents($agents, $db)
 	{
+		$db->query('DELETE FROM agent;');
+		$db->query('DELETE FROM agentv3;');
+		
 		$query = 'BEGIN TRANSACTION; ';
 		$queryv3 = 'BEGIN TRANSACTION; ';
 		foreach ($agents as $agent)
@@ -118,6 +124,19 @@
 
 		$db->query($query);
 		$db->query($queryv3);
+
+	}
+
+	/**
+	 * Check if there exists a value of the timeout in the cache.
+	 * @param  SQLite3 $db Database connection.
+	 * @return bool        Returns true if there exists a "last refresh value", false otherwise.
+	 */
+	function timeout_agents_exists($db)
+	{
+		$timeout_exists = $db->query('SELECT COUNT(agents_last_refresh) FROM agentstimeout');
+		$timeout_exists = $timeout_exists->fetchArray();
+		return ($timeout_exists[0]>0);
 	}
 
 	/**
@@ -126,7 +145,10 @@
 	 */
 	function update_agents_timeout($db)
 	{
-		$db->query('UPDATE agentstimeout SET agents_last_refresh = datetime("now")');
+		if(timeout_agents_exists($db))
+			$db->query('UPDATE agentstimeout SET agents_last_refresh=datetime("now")');
+		else
+			$db->query('INSERT INTO agentstimeout (agents_last_refresh) VALUES(datetime("now"))');
 	}
 
  ?>
