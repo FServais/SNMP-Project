@@ -1,41 +1,60 @@
 <?php 
 	/**
 	 * Get the tree-structured array containing the oids of the agent.
-	 * @param  string  $ip        IP of the agent.
-	 * @param  int     $port      Port of the agent.
-	 * @param  int     $version   Version of the agent.
-	 * @param  string  $community Community name of the agent.
-	 * @param  SQLite3 $db        Connection to the database.
-	 * @return array              Tree-structured arrays containing the oids.
+	 * @param  SQLite3 $db             Connection to the database.
+	 * @param  bool    $force_refresh  Boolean that tell if the cache is forced to be refreshed.
+	 * @param  string  $ip             IP of the agent.
+	 * @param  int     $port           Port of the agent.
+	 * @param  int     $version        Version of the agent.
+	 * @param  string  $community      Community name of the agent.
+	 * @param  string  $auth_proto     Authentication protocol (SNMPv3)
+	 * @param  string  $auth_pwd       Authentication password (SNMPv3)
+	 * @param  string  $priv_proto     Private protocol (SNMPv3)
+	 * @param  string  $priv_pwd       Private password (SNMPv3)
+	 * @return array                   Tree-structured arrays containing the oids.
 	 */
-	function get_mib_list($ip, $port, $version, $community, $db)
+	function get_mib_list($db, $force_refresh, $ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
 	{
 		$oids = array();
 
 		// Check timeout of the cache
-		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
+		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($community) . '" AND strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
-		if ($timeout[0] == 1) 
+		if ($force_refresh || $timeout[0] == 1) 
 		{
-			echo "Refreshing...";
-			$oids_raw = get_oids($ip, $port, $community, $version);
+			if($version == 3)
+				$oids_raw = get_oids($ip, $port, $version, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd);
+			else
+				$oids_raw = get_oids($ip, $port, $version, $community);
 
-			refresh_oids($oids_raw, $ip, $port, $community, $version, $db);
-			update_oids_timeout($ip, $port, $community, $version, $db);			
+			echo "OIDs are got.";
+
+			refresh_oids($oids_raw, $ip, $port, $version, $community, $db);
+			echo "Refreshing DB done.";
+			update_oids_timeout($ip, $port, $version, $community, $db);		
+			echo "Timeout updated";	
 		}
 		else
-		{
-			echo "Not refreshing.";
-			get_oids_db($ip, $port, $community, $version, $db);
-		}
+			$oids_raw = get_oids_db($ip, $port, $version, $community, $db);
 		
 		$oids = explodeTree($oids_raw, '.', false);
 		
 		return $oids;
 	}
 
-
+	/**
+	 * Send SNMP requests depending on the version to get all the OID in the agent.
+	 * @param  string  $ip         IP of the agent.
+	 * @param  int     $port       Port of the agent.
+	 * @param  int     $version    Version of the agent.
+	 * @param  string  $community  Community name of the agent.
+	 * @param  string  $auth_proto Authentication protocol (SNMPv3)
+	 * @param  string  $auth_pwd   Authentication password (SNMPv3)
+	 * @param  string  $priv_proto Private protocol (SNMPv3)
+	 * @param  string  $priv_pwd   Private password (SNMPv3)
+	 * @return array               Array where the keys are the OIDs.
+	 */
 	function get_oids($ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
 	{
 		$oids = array();
@@ -76,34 +95,56 @@
 		return $oids;
 	}
 
-
+	/**
+	 * Update the oids in the cache.
+	 * @param  array   $oids     Array where the keys are the oids.
+	 * @param  string  $ip         IP of the agent.
+	 * @param  int     $port       Port of the agent.
+	 * @param  int     $version    Version of the agent.
+	 * @param  string  $community  Community name of the agent.
+	 * @param  SQLite3 $db         Connection to the database.
+	 */
 	function refresh_oids($oids, $ip, $port, $version, $secname, $db)
 	{
 		$query = 'BEGIN TRANSACTION; ';
 		foreach ($oids as $oid => $value)
-			$query .= 'INSERT INTO oidnode (ip, port, version, secname, oid) VALUES ("' . SQLite3::escapeString($ip) . '", ' . $port . ', ' . $version . ', "' . SQLite3::escapeString($secname) . ', "' . SQLite3::escapeString($oid) . '");';
+			$query .= 'INSERT INTO oidnode (ip, port, version, secname, oid) VALUES ("' . SQLite3::escapeString($ip) . '", ' . $port . ', ' . $version . ', "' . SQLite3::escapeString($secname) . '", "' . SQLite3::escapeString($oid) . '");';
 
 		$query .= 'COMMIT;';
-
-		echo $query;
 
 		$db->query($query);
 	}
 
-
+	/**
+	 * Update the time of hte last refresh of the cache.
+	 * @param  string  $ip         IP of the agent.
+	 * @param  int     $port       Port of the agent.
+	 * @param  int     $version    Version of the agent.
+	 * @param  string  $community  Community name of the agent.
+	 * @param  SQLite3 $db         Connection to the database.
+	 */
 	function update_oids_timeout($ip, $port, $version, $secname, $db)
 	{
 		$db->query('INSERT OR REPLACE INTO oidstimeout (ip, port, version, secname, oids_last_refresh) VALUES ("' . SQLite3::escapeString($ip) . '", ' . $port . ', ' . $version . ', "' . SQLite3::escapeString($secname) . '", datetime("now"))');
 	}
 
-
+	/**
+	 * Get the oids from the cache.
+	 * @param  string  $ip         IP of the agent.
+	 * @param  int     $port       Port of the agent.
+	 * @param  int     $version    Version of the agent.
+	 * @param  string  $community  Community name of the agent.
+	 * @param  SQLite3 $db         Connection to the database.
+	 * @return array               Array where the keys are the OIDs.
+	 */
 	function get_oids_db($ip, $port, $version, $secname, $db)
 	{
 		$oids = array();
-		$result = $db->query('SELECT oid FROM oidnode WHERE ip=' . SQLite3::escapeString($ip) . ' AND port=' . $port . ' AND version=' . $version . ' AND secname=' . SQLite3::escapeString($secname));
-		while ($row = $results->fetchArray())
-			$oids[substr($row['oid'],1)];
+		$results = $db->query('SELECT oid FROM oidnode WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($secname) . '"');
 		
+		while ($row = $results->fetchArray())
+			$oids[$row['oid']] = "";
+
 		return $oids;
 	}
 
