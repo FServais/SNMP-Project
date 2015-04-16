@@ -81,7 +81,6 @@ input[type="submit"]:hover
 	color: #7F7F7F;
 
 	padding: 4px;
-	border: 1px rgba(0,0,0,0.2) solid;
 }
 
 #agents tr td:nth-child(2)
