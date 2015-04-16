@@ -130,7 +130,6 @@
 				$seclevel = 'noAuthNoPriv';
 
 			$oid = snmp3_getnext($ip, $community, $seclevel, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd, [".1"]);
-			// 30 seconds were not enough -> 5 min
 			ini_set('max_execution_time', 300);
 			while($oid)
 			{

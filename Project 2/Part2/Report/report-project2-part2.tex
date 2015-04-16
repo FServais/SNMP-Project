@@ -86,6 +86,13 @@ The model is implemented by a SQLite database and retains the agents and the lis
 	When the list is returned to the controller, the array containing the OID's is exploded to form a tree-structured array, an "OID-tree like". For exemple, \texttt{array("1.2.1" => "a", "1.2.2" => "b")} becomes (more or less) \texttt{array("1" => array("2" => array("1" => "a", "2" => "b")))}. This function \texttt{explodeTree(\$array, \$delimiter = '.', \$baseval = false)} comes from an external source\footnote{http://kvz.io/blog/2007/10/03/convert-anything-to-tree-structures-in-php/}, making the development faster since we do not have to solve the problem ourselves.
 \end{itemize}
 
+The scheme of the database is shown \textsc{Figure} \ref{db}. Note that the foreign key constraints are not implemented.
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.55]{db.png}
+	\caption{Database structure}
+	\label{db}
+\end{figure}
 
 \subsection{Controller}
 The controller processes the client requests by retrieving from the model the information needed. In the case of the request of an OID value, it sends the SNMP request directly in the network.
