@@ -14,16 +14,16 @@
 		$timeout_result = $db->query('SELECT 1 FROM agentstimeout WHERE strftime("%s", "now") - strftime("%s", agents_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
-		if ($force_refresh || !timeout_agents_exists($db) || $timeout[0] == 1) 
+		if ($force_refresh || !timeout_agents_exists($db) || $timeout[0] == 1) // -> Refresh
 		{
-			echo "Refresh agents...";
 			$agents_file = load_agents('agents.xml');
+
+			// Refresh the cache
 			refresh_agents($agents_file, $db);
 			update_agents_timeout($db);
 		}
-		else
-			echo "Not refreshing agents...";
 
+		// Get from the cache
 		$results = $db->query('SELECT ip, port, version, secname FROM agent WHERE version=1 OR version=2');
 		
 		while ($row = $results->fetchArray()) 
@@ -105,9 +105,11 @@
 	 */
 	function refresh_agents($agents, $db)
 	{
+		// Remove rows first
 		$db->query('DELETE FROM agent;');
 		$db->query('DELETE FROM agentv3;');
 		
+		// Insert new values
 		$query = 'BEGIN TRANSACTION; ';
 		$queryv3 = 'BEGIN TRANSACTION; ';
 		foreach ($agents as $agent)
