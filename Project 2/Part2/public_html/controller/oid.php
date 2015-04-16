@@ -7,7 +7,7 @@
 
 	if(isset($_GET['ip']) AND isset($_GET['port']) AND isset($_GET['version']) AND isset($_GET['secname']))
 	{
-		
+		$db = sqlite_connect();
 		$refresh = false;
 		if(isset($_GET['refresh']) && !strcmp($_GET['refresh'],'true'))
 			$refresh = true;
@@ -15,7 +15,6 @@
 		// if the agent is an snmpv3 one, we must retrieve the missing informations
 		if(intval($_GET['version']) == 3)
 		{
-			$db = sqlite_connect();
 			$agents = get_agents($db, false);
 			$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
 			
@@ -23,7 +22,6 @@
 					$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
 		}
 		
-
 		else
 			$oids = get_mib_list($db,  $refresh, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname']);	
 
