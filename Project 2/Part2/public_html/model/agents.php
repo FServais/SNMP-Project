@@ -16,7 +16,7 @@
 
 		if ($force_refresh || !timeout_agents_exists($db) || $timeout[0] == 1) // -> Refresh
 		{
-			$agents_file = load_agents('agents.xml');
+			$agents_file = load_agents('/home/nfs/nms01/public_html/agents.xml');
 
 			// Refresh the cache
 			refresh_agents($agents_file, $db);

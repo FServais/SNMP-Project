@@ -187,7 +187,7 @@ def xmlWriter(agentsList):
             ET.SubElement(target, "priv_pwd", ).text = priv_pwd
 
     tree = ET.ElementTree(targets)
-    tree.write("/home/nfs/nms01/public_html/model/agents.xml")
+    tree.write("/home/nfs/nms01/public_html/agents.xml")
 
 
 
