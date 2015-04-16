@@ -1,13 +1,15 @@
+<a href="index.php?page=agents"><- Back to agents</a>
+
 <?php 
 
 	echo '<h1> Oid tree for the agent '.$_GET['ip'].' </h1>';
 
-
+	echo '<div id="refresh">';
+	echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"] . '&secname=' . $_GET["secname"] . '&refresh=true"> Refresh MIB list</a> </br>'; 
+	echo '</div>';
 
 	echo '<div id="tree">'; 
 
-		echo '<a href="index.php?page=oid&ip=' . $_GET["ip"] . '&port=' . $_GET["port"] . '&version=' . $_GET["version"]
-			 			. '&secname=' . $_GET["secname"] . '&refresh=true"> Refresh MIB list</a> </br>'; 
 		
 		if(isset($_GET['oid']))
 		{

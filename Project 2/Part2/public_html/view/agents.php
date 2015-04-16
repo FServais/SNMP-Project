@@ -1,6 +1,8 @@
 
 <h1> Agents present in the network </h1>
-	<a href="index.php?page=agents&refresh=true"> Refresh agents </a> </br>
+	<div id="refresh">
+		<a href="index.php?page=agents&refresh=true"> Refresh agents </a> </br>
+	</div>
 	<div id="agents">
 		<table>
 			<tr>
