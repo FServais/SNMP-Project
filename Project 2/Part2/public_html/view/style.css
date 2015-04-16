@@ -5,6 +5,16 @@ body
 	font-family: "Trebuchet MS", Arial, Verdana, sans-serif;
 }
 
+a
+{
+	text-decoration: none;
+}
+
+a:visited
+{
+	color: black;
+}
+
 p
 {
 	text-align: left;
@@ -37,6 +47,33 @@ input[type="submit"]:hover
     background-color: rgb(236,236,236);
     color: rgba(0,0,0,0.5);
     border: 1px rgba(0,0,0,0.5) solid;
+}
+
+#refresh
+{
+	margin-bottom: 20px; 
+	border: 1px rgba(0,0,0,0.5) solid; 
+	margin-left: auto;
+	margin-right: auto;
+	width: 150px;
+	padding: 2px;
+
+	border-radius: 7px;
+}
+
+#refresh:hover
+{
+	background-color: #DADBDA;
+}
+
+#refresh:hover a
+{
+	color: #589458;
+}
+
+#refresh a
+{
+	color: black;
 }
 
 #agents .clicked
