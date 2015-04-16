@@ -10,6 +10,11 @@ from time import strftime
 from pysnmp.error import PySnmpError
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
+import xml.etree.cElementTree as ET
+
+agents = []
+config_file_name = ""; # Global to export
+
 usage = """\
 Usage: %s CONFIG
 
@@ -97,8 +102,20 @@ def add_agent(version, sec_name, ip, cred_index):
     # TODO Modify this function to write agent information in a place and form
     #      suitable for your web application
     date_time = strftime('%d/%m/%Y %H:%M:%S')
-    print("%s: v%d agent with sec_name %s on %s (%d)"
-              % (date_time, version, sec_name, ip, cred_index))
+    #print("%s: v%d agent with sec_name %s on %s (%d)" % (date_time, version, sec_name, ip, cred_index))
+    fp = open(config_file_name, 'r')
+    for i,line in enumerate(fp):
+        if i == cred_index+1:
+            if version == 3:
+                port, _, _, auth_proto, auth_pwd, priv_proto, priv_pwd = line.split(' ')
+                agent = (ip, port, str(version), sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd)
+            else:
+                port, _, _ = line.split(' ')
+                agent = (ip, port, str(version), sec_name, None, None, None, None)
+    fp.close()
+
+    agents.append(agent)
+
 
 def process_response(sendRequestHandle, errorIndication, errorStatus,
                      errorIndex, varBinds, args):
@@ -144,6 +161,36 @@ class V3Searcher(Thread):
                 self.lock.release()
                 break
 
+
+# Given a list of agents, write a XML file.
+def xmlWriter(agentsList):
+    
+    targets = ET.Element("targets")
+    
+    for i in agentsList:
+        
+        target = ET.SubElement(targets, "target")
+        
+        ip,port, version, sec_name, auth_proto, auth_pwd, priv_proto, priv_pwd = i
+        ET.SubElement(target, "ip", ).text = ip
+        ET.SubElement(target, "port",).text = port
+        ET.SubElement(target, "version", ).text = version
+        ET.SubElement(target, "sec_name", ).text = sec_name
+
+        if auth_proto != None:
+            ET.SubElement(target, "auth_proto", ).text = auth_proto
+        if auth_pwd != None:    
+            ET.SubElement(target, "auth_pwd", ).text = auth_pwd
+        if priv_proto != None:        
+            ET.SubElement(target, "priv_proto", ).text = priv_proto
+        if priv_pwd != None:
+            ET.SubElement(target, "priv_pwd", ).text = priv_pwd
+
+    tree = ET.ElementTree(targets)
+    tree.write("/home/nfs/nms01/public_html/model/agents.xml")
+
+
+
 if __name__ == "__main__":
     if len(argv) != 2:
         fatal("wrong number of arguments")
@@ -154,6 +201,7 @@ if __name__ == "__main__":
 
     try:
         config = Config(argv[1])
+        config_file_name = argv[1]
     except FileNotFoundError:
         fatal("could not open \"%s\"" % argv[1])
 
@@ -208,3 +256,5 @@ if __name__ == "__main__":
     # Wait for all the children to finish
     for t in threads:
         t.join()
+
+    xmlWriter(agents)
