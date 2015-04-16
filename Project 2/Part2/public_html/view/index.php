@@ -23,8 +23,9 @@
 
 		$pages = array('index', 'agents', 'oid', 'oidvalue');
 
-		/* Launch the corresponding controller (variable 'page' in URL)*/
-		if(isset($_GET['page']) && in_array($_GET['page'], $pages))
+		/* Launch the corresponding view (variable 'page' in URL)*/
+		if(isset($_GET['page']) && in_array($_GET['page'], $pages) AND isset($_GET['ip']) AND
+			 isset($_GET['port']) AND isset($_GET['version']) AND isset($_GET['secname']))
 			include_once('view/' . $_GET['page'] . '.php');
 		else
 			include_once('view/agents.php');

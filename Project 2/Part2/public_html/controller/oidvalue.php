@@ -9,13 +9,19 @@
 		AND isset($_GET['oid']))
 	{
 		$oid = $_GET['oid'];
-		$db = sqlite_connect();
-		$agents = get_agents($db, false);
-		$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
+		
+		//if the agent is an snmpv3 one, we must retrieve additional informations
+		if(intval($_GET['version']) == 3)
+		{
 
-		if($agent['version'] == 3)
+			$db = sqlite_connect();
+			$agents = get_agents($db, false);
+			$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
+
 			$value = get_oid_value($_GET['oid'],  $_GET['ip'], intval($_GET['port']), intval($_GET['version']),
-			 $_GET['secname'],$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
+			 	$_GET['secname'],$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
+		}
+			
 
 		else
 			$value = get_oid_value($_GET['oid'],  $_GET['ip'], intval($_GET['port']), intval($_GET['version']), 
@@ -25,7 +31,17 @@
 
 	}
 
-
+	/**
+	* Retrieve the good agent from the agent list
+	*
+	* @param array $agents 		the array containing all the agents
+	* @param string $ip 		the ip address of the researched agent   
+	* @param int $port 			the port number of the researched agent
+	* @param int $version 		the snmp version of the researched agent
+	* @param string $secname 	the community name of the researched agent
+	* 
+	* @return array 			the array containing all the informations about the corresponding agent
+	**/
 	function findAgentV3($agents, $ip, $port, $secname, $version)
 	{
 		
