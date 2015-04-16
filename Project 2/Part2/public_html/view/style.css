@@ -23,14 +23,6 @@ h2
 }
 
 
-#error
-{
-	margin-top: 0px;
-	margin-bottom: 1%;
-	color: rgba(214,60,54,0.9);
-	text-align: center;
-}
-
 input[type="submit"] 
 {
     background-color: rgb(236,236,236);

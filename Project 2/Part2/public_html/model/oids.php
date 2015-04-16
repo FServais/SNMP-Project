@@ -15,6 +15,7 @@
 	 */
 	function get_oid_value($oid, $ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
 	{
+		// Usage of "snmpget", differs depending on the version.
 		if($version == 1)
 			return snmpget($ip.':'.$port, $community, $oid);
 		elseif($version == 2)
@@ -58,27 +59,21 @@
 		$timeout_result = $db->query('SELECT 1 FROM oidstimeout WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($community) . '" AND strftime("%s", "now") - strftime("%s", oids_last_refresh) >= ' . 2 * 60 * 60);
 		$timeout = $timeout_result->fetchArray();
 
-		if ($force_refresh || !timeout_exists($ip, $port, $version, $community, $db) || $timeout[0] == 1) 
+		if ($force_refresh || !timeout_exists($ip, $port, $version, $community, $db) /*If is is hte first time*/ || $timeout[0] == 1) // -> Refresh
 		{
-			echo "Refresh <br>";
-			
-			if($version == 3)
-				$oids_raw = get_oids($ip, $port, $version, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd);
-			else
-				$oids_raw = get_oids($ip, $port, $version, $community);
+			// Send SNMP requests
+			$oids_raw = get_oids($ip, $port, $version, $community, $auth_proto, $auth_pwd, $priv_proto, $priv_pwd);
 
+			// Refresh the cache
 			refresh_oids($oids_raw, $ip, $port, $version, $community, $db);
 			update_oids_timeout($ip, $port, $version, $community, $db);		
 			
 		}
-		else{
-			echo "not refresh";
+		else // -> Get in the cache
 			$oids_raw = get_oids_db($ip, $port, $version, $community, $db);
-		}
 		
-		$oids = explodeTree($oids_raw, '.', false);
-		echo 'taille'.count($oids);
-		return $oids;
+		// Return tree-structured arrays
+		return explodeTree($oids_raw, '.', false);
 	}
 
 	/**
@@ -96,10 +91,13 @@
 	function get_oids($ip, $port, $version, $community, $auth_proto = "", $auth_pwd = "", $priv_proto = "", $priv_pwd = "")
 	{
 		$oids = array();
+
+		// Configurations of the output
 		snmp_set_quick_print( 1 );
 		snmp_set_enum_print( 0 );
 		snmp_set_oid_output_format( SNMP_OID_OUTPUT_NUMERIC );
 
+		// Run with series of snmpgetnext
 		if($version == 1)
 		{
 			$oid = @snmpgetnext($ip, $community, [".1"]);		
@@ -154,6 +152,7 @@
 	 */
 	function refresh_oids($oids, $ip, $port, $version, $secname, $db)
 	{
+		// Remove rows first
 		$db->query('DELETE FROM oidnode WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($secname) . '"');
 
 		$query = 'BEGIN TRANSACTION; ';
@@ -193,7 +192,7 @@
 		$results = $db->query('SELECT oid FROM oidnode WHERE ip="' . SQLite3::escapeString($ip) . '" AND port=' . $port . ' AND version=' . $version . ' AND secname="' . SQLite3::escapeString($secname) . '"');
 		
 		while ($row = $results->fetchArray())
-			$oids[$row['oid']] = "";
+			$oids[$row['oid']] = ""; // The oid has to be the key
 
 		return $oids;
 	}
