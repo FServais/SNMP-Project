@@ -52,14 +52,27 @@
 %Page de garde
 \maketitle
 
-
-
-
+\section{Detecting the agents}
+To enhance the previous script, we took the one provided to us and modify it in order to allow it to write the results in the XML, as in the first part of the project.
 
 \section{Application}
+Our website is available at the page : 
+\begin{center}
+	http://bee.run.montefiore.ulg.ac.be/\textasciitilde nms01/
+\end{center}
 To develop our application, we used the MVC pattern.
+
 \subsection{Model}
- The model is implemented by a SQLite database and retains the agents and the MIB list of objects for each agent, which allows a quite fast retrieval of information. The database is updated periodically, this is quite an heavy update(....Fabs?). 
+
+The model is implemented by a SQLite database and retains the agents and the list of objects for each agent, which allows a quite fast retrieval of information, it is a cache. This database has a timeout of two hours, if we try to access it after that, it will retrieve the information again and update the cache:
+\begin{itemize}
+	\item For the agents, the list is stored in the \texttt{/model} directory in a XML file, which is read before inserting the agents in the database. The XML file is indeed adding one more step, from retrieving the agents to store them in the database. An improvement could be to store them directly in the database, however, in the first part of the project, we stored them in the XML format. To keep coherence (and by lack of time), we kept this transitional and read from it to populate the database.
+
+	\item To list of OID's contained in an agent are got by running a serie of \texttt{snmpgetnext}, beginning at the root. We did not used \texttt{snmpwalk} because it seems that it retrieved less objects than \texttt{snmpgetnext}. These objects are directly stored in the cache as the retrieval is finished. Same as the agents' cache, it is refreshed after two hours. In the database, an agent is always recognized by the 4-tuple (ip, port, version, sec\_name). We also provide phpLiteAdmin to see in a more easier way the content of the database\footnote{http://bee.run.montefiore.ulg.ac.be/\textasciitilde nms01/phpliteadmin.php - Password: admin}.
+	\paragraph{}
+	When the list is returned to the controller, the array containing the OID's is exploded to form a tree-structured array, an "OID-tree like". For exemple, \texttt{array("1.2.1" => "a", "1.2.2" => "b")} becomes (more or less) \texttt{array("1" => array("2" => array("1" => "a", "2" => "b")))}. This function \texttt{explodeTree(\$array, \$delimiter = '.', \$baseval = false)} comes from an external source\footnote{http://kvz.io/blog/2007/10/03/convert-anything-to-tree-structures-in-php/}, making the development faster since we do not have to solve the problem ourselves.
+\end{itemize}
+
 
 \subsection{Controller}
 The controller treats the client requests by retrieving from the model the information needed. In the case of the request of an OID value, it sends the SNMP request directly in the network.\\ \\
