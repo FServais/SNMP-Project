@@ -1,5 +1,6 @@
 
 <h1> Agents present in the network </h1>
+	<a href="index.php?page=agents&refresh=true"> Refresh agents </a> </br>
 	<div id="agents">
 		<table>
 			<tr>
@@ -10,7 +11,7 @@
 			</tr>
 			
 			<?php 
-				echo '<a href="index.php?page=agents&refresh=true"> Refresh agents </a> </br>'; 
+			// display agents
 				foreach($agents_array as $key =>  $agent)
 				{
 					$ip = $agent["ip"];
