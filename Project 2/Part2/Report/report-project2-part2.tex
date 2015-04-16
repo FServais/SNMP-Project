@@ -88,11 +88,15 @@ The model is implemented by a SQLite database and retains the agents and the lis
 
 
 \subsection{Controller}
-The controller treats the client requests by retrieving from the model the information needed. In the case of the request of an OID value, it sends the SNMP request directly in the network.\\ \\
+The controller processes the client requests by retrieving from the model the information needed. In the case of the request of an OID value, it sends the SNMP request directly in the network.
 
-We tried to make the requests to the database as light as possible, that is why we only retrieve all the mib list for an agent, even if we know the OID of the requested object. The model transforms the list in a form of tree, which allows efficient access from the controller. \\ \\
+\paragraph{}
 
-We also decided that the informations needed to identify an SNMP agent are its ip address, its port number, the SNMP version used and the community name. The other informations about SNMPv3 agents are kept local and never communicated to the client, it is a (maybe too) simple way to avoid communicating the passwords to the client. 
+We tried to make the requests to the database as light as possible, that is why we only retrieve all the mib list for an agent, even if we know the OID of the requested object. The model transforms the list in a form of tree, which allows efficient access from the controller.
+
+\paragraph{}
+
+We also decided that the information needed to identify an SNMP agent are its ip address, its port number, the SNMP version used and the community name. The other informations about SNMPv3 agents are kept local and never communicated to the client, it is a (maybe too) simple way to avoid communicating the passwords to the client. 
 
 
 \subsection{View}
@@ -101,6 +105,9 @@ The view is simple, it displays the data the controller collected.
 
 
 \section{Feedback} 
-We think the projects were interesting, it allowed us to learn new things : we had never coded in python, neither heard about cron jobs. And creating a website is always a good exercice, as we don't do it often, but we think it is essential to have some experience in that field too. \\ \\
-The SNMP subject is sure important and helped us realise that it is not "simple" as its name could let us think, but we would also have enjoyed a subject more related to security. Even if we have the project of the course "Introduction to computer securiy".
+We think the projects were interesting, it allowed us to learn new things : we had never coded in python, neither heard about cron jobs, and creating a website is always a good exercice, as we don't do it often, but we think it is essential to have some experience in that field too.
+
+\paragraph{}
+
+The SNMP subject is sure important and helped us realise that it is not "simple" as its name could let us think and it is good to have the opportunity to have some "hands-on" experience of SNMP. However, we would also have enjoyed a subject more related to security, even if we have the projects of the course "Introduction to computer securiy".
 \end{document}
