@@ -1,10 +1,8 @@
-<?php
-	error_reporting(E_ALL); 
+<?php 
 	session_start();
 
-	echo 'coucou y a quand même un truc marche';
 	// Contains the accessible pages
-	$pages = array('index', 'agents');
+	$pages = array('index', 'agents', 'oid', 'oidvalue');
 
 	/* Launch the corresponding controller (variable 'page' in URL)*/
 	if(isset($_GET['page']) && in_array($_GET['page'], $pages))
