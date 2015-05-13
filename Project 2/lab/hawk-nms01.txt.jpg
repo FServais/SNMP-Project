@@ -67,7 +67,7 @@ line vty 0 4
 interface FastEthernet0/1
  ip access-group 150 in
  ip access-group 149 in
- rate-limit input rate-limit access-group 149 500 000  3750000 7500000 conform-action transmit exceed-action drop
+ rate-limit input access-group 149 500 000  3750000 7500000 conform-action transmit exceed-action drop
 
 logging bee
 
