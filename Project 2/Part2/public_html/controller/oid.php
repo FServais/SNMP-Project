@@ -16,7 +16,7 @@
 		if(intval($_GET['version']) == 3)
 		{
 			$agents = get_agents($db, false);
-			$agent = findAgentV3($agents, $_GET['ip'], $_GET['port'], $_GET['secname'], $_GET['version']);
+			$agent = findAgentV3($agents, $_GET['ip'], intval($_GET['port']), $_GET['secname'], intval($_GET['version']));
 			
 			$oids = get_mib_list($db, $refresh, $_GET['ip'], intval($_GET['port']), intval($_GET['version']), $_GET['secname'],
 					$agent['auth_proto'], $agent['auth_pwd'], $agent['priv_proto'], $agent['priv_pwd']);
