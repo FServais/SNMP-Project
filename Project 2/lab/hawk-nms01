@@ -147,7 +147,8 @@ access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
 access-list 149 permit ip any 139.165.255.255 0.0.0.0
 
 !-- SYN FLOODING
-ip inspect max-incomplete high 500
+ip inspect max-incomplete low 200
+ip inspect max-incomplete high 300
 
 
 !--- Forbid ipv6
