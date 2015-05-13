@@ -67,12 +67,13 @@ line vty 0 4
 interface FastEthernet0/1
  ip access-group 150 in
  ip access-group 149 in
+ ipv6 traffic-filter no-ipv6 in
  rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
 
  !--- Spoofing
  ip verify unicast reverse-path
  
-logging bee
+!--- logging bee
 
 !--- Temporary
 access-list 150 permit tcp any any eq telnet
@@ -146,7 +147,7 @@ ip inspect max-incomplete high 500
 
 
 !--- Forbid ipv6
-access-list 150 deny ipv6 any any
+ipv6 access-list no-ipv6 deny any any
 
 ! access-list 101 permit tcp any host scarab eq www
 ! access-list 101 permit tcp host hawk host bumblebee eq telnet
