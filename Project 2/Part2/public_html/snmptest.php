@@ -1,7 +1,7 @@
 <?php 
 	error_reporting(E_ALL);
 
-	
+	/*
 	ini_set('display_errors', 1);
 	//snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
 	$a = snmp2_get("hawk.run.montefiore.ulg.ac.be", "run69Zork!", "1.2.1");
@@ -12,7 +12,7 @@
 	echo "<pre>";
 	print_r($a);
 	echo "</pre>";
-	
+	*/
 	/*
 	foreach ($a as $val) {
 	    echo "$val\n";
@@ -24,22 +24,22 @@
 	    echo "$i: $a[$i]<br />\n";
 	}
 	*/
-	/*
+	
 	ini_set('display_errors', 1);
-	snmp_set_valueretrieval( SNMP_VALUE_OBJECT | SNMP_VALUE_PLAIN );
+	//snmp_set_valueretrieval( SNMP_VALUE_OBJECT | SNMP_VALUE_PLAIN );
 	
 	snmp_set_quick_print( 1 );
 	snmp_set_enum_print( 0 );
 	snmp_set_oid_output_format( SNMP_OID_OUTPUT_NUMERIC );
-	$oid = snmp2_getnext("139.165.222.253", "public!", [".1"]);
+	$oid = snmp3_getnext("139.165.222.6", "JohnSmith", "authPriv", "SHA", "Fei)bu7re", 'AES', 'Kaeph-ah9', [".1"]);
 	
 	while($oid)
 	{
 		print_r($oid);
 		echo '<br>';
-		$oid = snmp2_getnext("139.165.222.253", "public!", [key($oid)]);
+		$oid = snmp3_getnext("139.165.222.6", "JohnSmith", "authPriv", "SHA", "Fei)bu7re", 'AES', 'Kaeph-ah9', [key($oid)]);
 	}
-	*/
+	
 	
 	/*
 	include_once('model/sqlite_connection.php');
