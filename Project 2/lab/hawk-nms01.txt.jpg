@@ -76,7 +76,7 @@ access-list 150 permit tcp any any eq telnet
 access-list 150 permit tcp any eq telnet any
 
 !--- ICMP
-access-list 150 permit icmp 139.165.0.0 0.0.255.255 any
+access-list 149 permit icmp 139.165.0.0 0.0.255.255 any
 
 !--- HTTP
 ! from scarab
@@ -136,6 +136,7 @@ access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
 access-list 149 ip permit any 139.165.255.255 0.0.0.0 
+
 !--- SYN flooding
 class-map conn
 match access-list 150
