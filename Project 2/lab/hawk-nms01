@@ -71,7 +71,7 @@ interface FastEthernet0/1
 
  !--- Spoofing
  ip verify unicast reverse-path
- 
+
 logging bee
 
 !--- Temporary
@@ -135,6 +135,16 @@ access-list 150 deny tcp any any eq domain log
 !--- SMTP
 access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
 access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
+
+!--- FTP
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be gt 1024
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp-data established
+
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp any established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq 1024 any established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data any
+
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
