@@ -70,6 +70,9 @@ interface FastEthernet0/1
  ipv6 traffic-filter no-ipv6 in
  rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
 
+ interface FastEthernet0/0
+  ip access-group 140 out
+
  !--- Spoofing
  ip verify unicast reverse-path
  
@@ -133,6 +136,8 @@ access-list 150 deny tcp any any eq domain log
 
 !--- NFS ?? -> 2049
 
+!--- FTP 
+
 !--- SMTP
 access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
 access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
@@ -145,9 +150,16 @@ access-list 149 permit ip any 139.165.255.255 0.0.0.0
 ip inspect max-incomplete high 500
 
 
-
 !--- Forbid ipv6
 ipv6 access-list no-ipv6 deny any any
+
+!--- anti-spoof
+access-list 150 permit ip scarab 0.0.0.0 any
+access-list 150 permit ip termite 0.0.0.0 any
+access-list 150 deny ip any any
+
+access-list 140 deny scarab 0.0.0.0 any 
+access-list 140 deny termite 0.0.0.0 any 
 
 ! access-list 101 permit tcp any host scarab eq www
 ! access-list 101 permit tcp host hawk host bumblebee eq telnet
