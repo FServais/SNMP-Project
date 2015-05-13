@@ -66,17 +66,22 @@ line vty 0 4
  login local
 
 ! FIREWALL
+interface FastEthernet0/0
+ ip access-group 140 in
+ ipv6 traffic-filter no-ipv6 in
+
+
 interface FastEthernet0/1
  ip access-group 150 in
  ip access-group 149 in
  ipv6 traffic-filter no-ipv6 in
  rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
 
- interface FastEthernet0/0
-  ip access-group 140 out
+interface FastEthernet0/0
+ ip access-group 140 out
 
- !--- Spoofing
- ip verify unicast reverse-path
+!--- Spoofing
+ip verify unicast reverse-path
 
 !--- logging bee
 
