@@ -10,6 +10,8 @@ username root privilege 15 secret 5 $1$yHfA$BCU.6OOi6z.YujYn10gKt/
 service timestamps debug uptime
 service timestamps log uptime
 
+logging facility local0
+
 ! No clear-text passwords
 service password-encryption
 
