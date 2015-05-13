@@ -67,8 +67,11 @@ line vty 0 4
 interface FastEthernet0/1
  ip access-group 150 in
  ip access-group 149 in
- rate-limit input rate-limit access-group 149 500 000  3750000 7500000 conform-action transmit exceed-action drop
+ rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
 
+ !--- Spoofing
+ ip verify unicast reverse-path
+ 
 logging bee
 
 !--- Temporary
@@ -135,21 +138,12 @@ access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
-access-list 149 ip permit any 139.165.255.255 0.0.0.0 
+access-list 149 permit ip any 139.165.255.255 0.0.0.0
 
-!--- SYN flooding
-class-map conn
-match access-list 150
-end
+!-- SYN FLOODING
+ip inspect max-incomplete high 500
 
-policy-map conn
-class conn
-set connection embryonic-conn-max 50
-end 
-end
 
-!--- Spoofing
-ip verify reverse-path interface (interface_name)
 
 !--- Forbid ipv6
 access-list 150 deny ipv6 any any
