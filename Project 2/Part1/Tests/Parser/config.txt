@@ -1,5 +1,0 @@
-139.165.48.43/20
-161 1 public
-161 2 public
-161 2 run69Zork!
-161 3 JohnSmith SHA Fei)bu7re AES Kaeph-ah9
