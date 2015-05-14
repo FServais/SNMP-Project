@@ -10,6 +10,8 @@ username root privilege 15 secret 5 $1$yHfA$BCU.6OOi6z.YujYn10gKt/
 service timestamps debug uptime
 service timestamps log uptime
 
+logging facility local0
+
 ! No clear-text passwords
 service password-encryption
 
@@ -152,9 +154,20 @@ access-list 150 permit ip any ant eq 2049
 access-list 151 permit ip ant eq 2049 any established
 !--- FTP 
 
+
 !--- SMTP
 access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
 access-list 151 permit tcp host smtp.ulg.ac.be eq smtp any
+
+!--- FTP
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be gt 1024
+access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp-data established
+
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp any established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq 1024 any established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data any
+
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
@@ -176,6 +189,7 @@ ipv6 access-list no-ipv6 deny any any
 ! access-list 150 permit ip termite 0.0.0.0 any
 access-list 150 deny ip any any log
 access-list 151 deny ip any any log
+
 
 ! access-list 101 permit tcp any host scarab eq www
 ! access-list 101 permit tcp host hawk host bumblebee eq telnet
