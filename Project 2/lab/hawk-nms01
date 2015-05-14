@@ -64,37 +64,40 @@ line vty 0 4
  login local
 
 ! FIREWALL
-interface FastEthernet0/1
- ip access-group 150 in
- ip access-group 149 in
+interface FastEthernet0/0
+ ip access-group 150 out
+ ip access-group 151 in
  ipv6 traffic-filter no-ipv6 in
+ ipv6 traffic-filter no-ipv6 out
+ ! limit broadcast traffic
  rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
+ ! limit icmp traffic
+ rate-limit output access-group 140 500000 3750000 7500000 conform-action transmit exceed-action drop
+ rate-limit input access-group 152 500000 3750000 7500000 conform-action transmit exceed-action drop
 
- interface FastEthernet0/0
-  ip access-group 140 out
 
- !--- Spoofing
- ip verify unicast reverse-path
- 
-!--- logging bee
-
-!--- Temporary
+!--- Temporary --- TELNET FORBIDDEN
 access-list 150 permit tcp any any eq telnet
 access-list 150 permit tcp any eq telnet any
 
-!--- ICMP
-access-list 149 permit icmp 139.165.0.0 0.0.255.255 any
+ 
+!--- anti-spoof : scarab and termite can not be spoofed from outside
+access-list 151 deny scarab 0.0.0.0 any 
+access-list 151 deny termite 0.0.0.0 any 
+
+!--- ICMP LIMIT inbound
+access-list 152 permit icmp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255
 
 !--- HTTP
 ! from scarab
-access-list 150 permit tcp any host scarab eq 80
+access-list 151 permit tcp any host scarab eq 80
 access-list 150 permit tcp host scarab eq 80 any established
 ! to the internet ???
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 80
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 443
 
-access-list 150 permit tcp any eq 80 139.165.0.0 0.0.255.255 established
-access-list 150 permit tcp any eq 443 139.165.0.0 0.0.255.255 established
+access-list 151 permit tcp any eq 80 139.165.0.0 0.0.255.255 established
+access-list 151 permit tcp any eq 443 139.165.0.0 0.0.255.255 established
 
 access-list 150 deny tcp any any eq 80 log
 access-list 150 deny tcp any any eq 443 log
@@ -105,46 +108,60 @@ access-list 150 deny tcp any eq 443 any
 !--- SSH
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255 eq 22
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.0.0 0.0.255.255
+
+access-list 151 permit tcp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255 eq 22
+access-list 151 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.0.0 0.0.255.255
+
 access-list 150 deny tcp any any eq 22 log
 access-list 150 deny tcp any eq 22 any log
 
-!--- DHCP - Outbound
+!--- DHCP
 ! discover
-access-list 150 permit udp 0.0.0.0 0.0.0.0 eq 68 255.255.255.255 0.0.0.0 eq 67
-access-list 150 permit udp host hawk eq 67 any eq 68
+access-list 151 permit udp 0.0.0.0 0.0.0.0 eq 68 255.255.255.255 0.0.0.0 eq 67
+access-list 151 permit udp host hawk eq 67 any eq 68
 access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host hawk eq 67
 
 ! requests
-access-list 150 permit udp 139.165.0.0 0.0.255.255 host ant eq 67
+access-list 151 permit udp 139.165.0.0 0.0.255.255 host ant eq 67
 access-list 150 permit udp host ant eq 67 139.165.0.0 0.0.255.255
 
 access-list 150 deny udp any eq 68 any eq 67 log
 access-list 150 deny udp any eq 67 any eq 68 log
 
+access-list 151 deny udp any eq 68 any eq 67 log
+access-list 151 deny udp any eq 67 any eq 68 log
+
 !--- OSPF
 access-list 150 permit ospf any any
+access-list 151 permit ospf any any
 
 !--- DNS - Outbound
 access-list 150 permit udp 139.165.0.0 0.0.255.255 host queen eq domain
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 host queen eq domain
-access-list 150 permit udp host queen eq domain 139.165.0.0 0.0.255.255
-access-list 150 permit tcp host queen eq domain 139.165.0.0 0.0.255.255
+access-list 151 permit udp host queen eq domain 139.165.0.0 0.0.255.255
+access-list 151 permit tcp host queen eq domain 139.165.0.0 0.0.255.255
 access-list 150 deny udp any any eq domain log
 access-list 150 deny tcp any any eq domain log
 
-!--- LDAP ??
+!--- LDAP
+access-list 150 permit ip any ant eq 389
+access-list 151 permit ip ant eq 389 any established
 
-!--- NFS ?? -> 2049
-
+!--- NFS 
+access-list 150 permit ip any ant eq 2049
+access-list 151 permit ip ant eq 2049 any established
 !--- FTP 
 
 !--- SMTP
 access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
-access-list 150 permit tcp host smtp.ulg.ac.be eq smtp any
+access-list 151 permit tcp host smtp.ulg.ac.be eq smtp any
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
 access-list 149 permit ip any 139.165.255.255 0.0.0.0
+
+!--- ICMP LIMIT outbound
+access-list 140 permit icmp 139.165.0.0 0.0.255.255 any
 
 !-- SYN FLOODING
 ip inspect max-incomplete low 200
@@ -154,13 +171,11 @@ ip inspect max-incomplete high 300
 !--- Forbid ipv6
 ipv6 access-list no-ipv6 deny any any
 
-!--- anti-spoof
-access-list 150 permit ip scarab 0.0.0.0 any
-access-list 150 permit ip termite 0.0.0.0 any
-access-list 150 deny ip any any
-
-access-list 140 deny scarab 0.0.0.0 any 
-access-list 140 deny termite 0.0.0.0 any 
+!--- anti spoof
+! access-list 150 permit ip scarab 0.0.0.0 any
+! access-list 150 permit ip termite 0.0.0.0 any
+access-list 150 deny ip any any log
+access-list 151 deny ip any any log
 
 ! access-list 101 permit tcp any host scarab eq www
 ! access-list 101 permit tcp host hawk host bumblebee eq telnet
