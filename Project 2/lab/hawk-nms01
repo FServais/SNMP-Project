@@ -21,7 +21,7 @@ snmp-server community run69Zork! RO
 ! GLOBAL NETWORK PARAMETERS
 
 ! DNS
-hostname hawk
+hostname owl
 ip domain name run.montefiore.ulg.ac.be
 ip name-server 139.165.223.30
 
@@ -54,7 +54,7 @@ ip ospf name-lookup
 
 ! ACCESS
 
-banner motd /Welcome in RUN lab (hawk)/
+banner motd /Welcome in RUN lab (owl)/
 
 ! Console
 line con 0
@@ -71,8 +71,6 @@ interface FastEthernet0/0
  ip access-group 151 in
  ipv6 traffic-filter no-ipv6 in
  ipv6 traffic-filter no-ipv6 out
- ! limit broadcast traffic
- rate-limit input access-group 149 500000 3750000 7500000 conform-action transmit exceed-action drop
  ! limit icmp traffic
  rate-limit output access-group 140 500000 3750000 7500000 conform-action transmit exceed-action drop
  rate-limit input access-group 152 500000 3750000 7500000 conform-action transmit exceed-action drop
@@ -84,16 +82,17 @@ access-list 150 permit tcp any eq telnet any
 
  
 !--- anti-spoof : scarab and termite can not be spoofed from outside
-access-list 151 deny scarab 0.0.0.0 any 
-access-list 151 deny termite 0.0.0.0 any 
+access-list 151 deny hornet 0.0.0.0 any 
+access-list 151 deny ladybug 0.0.0.0 any 
 
 !--- ICMP LIMIT inbound
-access-list 152 permit icmp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255
+access-list 152 permit icmp any any
+access-list 150 permit icmp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255
 
 !--- HTTP
 ! from scarab
-access-list 151 permit tcp any host scarab eq 80
-access-list 150 permit tcp host scarab eq 80 any established
+access-list 151 permit tcp any host hornet eq 80
+access-list 150 permit tcp host hornet eq 80 any established
 ! to the internet ???
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 80
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 443
@@ -120,8 +119,8 @@ access-list 150 deny tcp any eq 22 any log
 !--- DHCP
 ! discover
 access-list 151 permit udp 0.0.0.0 0.0.0.0 eq 68 255.255.255.255 0.0.0.0 eq 67
-access-list 151 permit udp host hawk eq 67 any eq 68
-access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host hawk eq 67
+access-list 151 permit udp host owl eq 67 any eq 68
+access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host owl eq 67
 
 ! requests
 access-list 151 permit udp 139.165.0.0 0.0.255.255 host ant eq 67
@@ -171,14 +170,14 @@ access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data any
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
-access-list 149 permit ip any 139.165.255.255 0.0.0.0
-
+no ip directed-broadcast
 !--- ICMP LIMIT outbound
-access-list 140 permit icmp 139.165.0.0 0.0.255.255 any
+access-list 140 permit icmp any any
+access-list 151 permit icmp 139.165.0.0 0.0.255.255 any
 
 !-- SYN FLOODING
-ip inspect max-incomplete low 200
-ip inspect max-incomplete high 300
+ip inspect max-incomplete low 100
+ip inspect max-incomplete high 200
 
 
 !--- Forbid ipv6
@@ -192,9 +191,9 @@ access-list 151 deny ip any any log
 
 
 ! access-list 101 permit tcp any host scarab eq www
-! access-list 101 permit tcp host hawk host bumblebee eq telnet
-! access-list 101 permit tcp host bumblebee host hawk eq telnet
-! access-list 101 permit udp host hawk host ant eq tftp
+! access-list 101 permit tcp host owl host bumblebee eq telnet
+! access-list 101 permit tcp host bumblebee host owl eq telnet
+! access-list 101 permit udp host owl host ant eq tftp
 ! access-list 101 permit tcp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255 eq 22
 ! access-list 101 deny icmp 139.165.0.0 0.0.255.255  any
 ! access-list 101 deny tcp any host scarab
