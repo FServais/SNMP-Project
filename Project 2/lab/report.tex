@@ -53,11 +53,11 @@
 \maketitle
 
 \section{Overview}
-In order to protect our subnet, we used extended access lists and rate limitations. We placed our firewall rules on the outer interface of the router. We made this choice because we refuse a lot of incoming traffic, in this way, the non-conform traffic is dropped before being routed.
+In order to protect our subnet, we used extended access lists and rate limitations. We placed our firewall rules on the outer interface of the router. We made this choice because we refuse a lot of incoming traffic, in this way, the non-conform traffic is dropped before being routed. We uses 2 access-group, one \texttt{in} and one \texttt{out} to enhance the lisibility of the rules and thus also the ease of the maintenance.
 
 \paragraph{}
  % Discuss the advantages and drawbacks of your approach regarding security, efficiency and readability/ease of (re)configuration.
- We based ourselves a lot on the standard ports in order to filter the traffic according to each protocol.  This could be a big  limitation if the standard ports were not used, but when we scanned the ports of the server, we saw that these ports were used in almost every case (sometimes there is other ports dedicated in addition to the standard ones).
+ We based ourselves a lot on the standard ports in order to filter the traffic according to each protocol. This could be a big limitation if the standard ports were not used, but when we scanned the ports of the server, we saw that these ports were used in almost every cases (sometimes there is other ports dedicated in addition to the standard ones).
 \section{Authorized inbound traffic}
 \paragraph{ICMP} We decided to limit the icmp traffic to less than 10 percent of the bandwidth of the link. We did not differentiate according to the type of \texttt{ICMP} as there are so many of them and as \texttt{ICMP} is not absolutely necessary to the proper function of a network.
 
