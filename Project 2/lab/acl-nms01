@@ -1,0 +1,279 @@
+
+interface FastEthernet0/0
+ no ip access-group 150 out
+ no ip access-group 151 in
+ no ipv6 traffic-filter no-ipv6 in
+ no ipv6 traffic-filter no-ipv6 out
+
+no access-list 150 permit tcp any any eq telnet
+no access-list 150 permit tcp any eq telnet any
+no access-list 151 permit tcp any any eq telnet
+no access-list 151 permit tcp any eq telnet any
+
+no access-list 150 permit udp 139.165.0.0 0.0.255.255 host ant eq tftp
+no access-list 151 permit udp host ant gt 1023 139.165.0.0 0.0.255.255 gt 1023 
+no access-list 151 permit udp 139.165.0.0 0.0.255.255 gt 1023 host ant gt 1023
+
+
+!--- 139.165.222.3i-spoof : scarab and termite can not be spoofed from outside
+no access-list 151 deny ip host 139.165.222.162 any log
+no access-list 151 deny ip host 139.165.222.163 any log
+
+
+
+!--- ICMP LIMIT inbound
+no access-list 152 permit icmp any any
+no access-list 151 permit icmp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.31
+
+!--- HTTP
+! from 139.165.222.162
+no access-list 151 permit tcp any host 139.165.222.162 eq 80
+no access-list 150 permit tcp host 139.165.222.162 eq 80 any established
+! to the internet ???
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 80
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 443
+
+no access-list 151 permit tcp any eq 80 139.165.222.160 0.0.0.31 established
+no access-list 151 permit tcp any eq 443 139.165.222.160 0.0.0.31 established
+
+no access-list 150 deny tcp any any eq 80 log
+no access-list 150 deny tcp any any eq 443 log
+
+no access-list 150 deny tcp any eq 80 any log
+no access-list 150 deny tcp any eq 443 any log
+
+no access-list 151 deny tcp any any eq 80 log
+no access-list 151 deny tcp any any eq 443 log
+
+no access-list 151 deny tcp any eq 80 any log
+no access-list 151 deny tcp any eq 443 any log
+
+!--- SSH
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 139.165.0.0 0.0.255.255 eq 22
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 eq 22 139.165.0.0 0.0.255.255
+
+no access-list 151 permit tcp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.31 eq 22
+no access-list 151 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.222.160 0.0.0.31
+
+no access-list 150 deny tcp any any eq 22 log
+no access-list 150 deny tcp any eq 22 any log
+
+!--- DHCP
+! discover
+no access-list 150 permit udp 0.0.0.0 0.0.0.0 eq 68 255.255.255.255 0.0.0.0 eq 67
+no access-list 150 permit udp host 139.165.222.4 eq 67 any eq 68
+no access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host 139.165.222.4 eq 67
+
+no access-list 150 permit udp host 139.165.222.161 eq 67 any eq 68
+no access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host 139.165.222.161 eq 67
+
+! requests
+no access-list 150 permit udp 139.165.0.0 0.0.255.255 host 139.165.222.3 eq 67
+no access-list 151 permit udp host 139.165.222.3 eq 67 139.165.0.0 0.0.255.255
+
+no access-list 150 deny udp any eq 68 any eq 67 log
+no access-list 150 deny udp any eq 67 any eq 68 log
+
+no access-list 151 deny udp any eq 68 any eq 67 log
+no access-list 151 deny udp any eq 67 any eq 68 log
+
+!--- OSPF
+no access-list 150 permit ospf any any
+no access-list 151 permit ospf any any
+
+!--- DNS - Outbound
+no access-list 150 permit udp 139.165.0.0 0.0.255.255 host queen eq domain
+no access-list 150 permit tcp 139.165.0.0 0.0.255.255 host queen eq domain
+no access-list 151 permit udp host queen eq domain 139.165.0.0 0.0.255.255
+no access-list 151 permit tcp host queen eq domain 139.165.0.0 0.0.255.255
+no access-list 150 deny udp any any eq domain log
+no access-list 150 deny tcp any any eq domain log
+
+!--- LDAP
+no access-list 150 permit udp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 389
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 389
+no access-list 151 permit udp host 139.165.222.3 eq 389 139.165.222.160 0.0.0.31 established
+no access-list 151 permit tcp host 139.165.222.3 eq 389 139.165.222.160 0.0.0.31 established
+
+!--- NFS
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 2049
+no access-list 150 permit udp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 2049
+no access-list 151 permit tcp host 139.165.222.3 eq 2049 139.165.222.160 0.0.0.31 established
+no access-list 151 permit udp host 139.165.222.3 eq 2049 139.165.222.160 0.0.0.31 established
+
+!--- SMTP
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host smtp.ulg.ac.be eq smtp
+no access-list 151 permit tcp host smtp.ulg.ac.be eq smtp 139.165.222.160 0.0.0.31 established
+
+!--- FTP
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be gt 1023
+no access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp-data established
+
+no access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp 139.165.222.160 0.0.0.31 established
+no access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be gt 1023 139.165.222.160 0.0.0.31 established
+no access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data 139.165.222.160 0.0.0.31
+
+
+
+
+!--- ICMP LIMIT outbound
+no access-list 140 permit icmp any any
+no access-list 150 permit icmp 139.165.222.160 0.0.0.31 any
+
+!-- SYN FLOODING
+ip inspect max-incomplete low 100
+ip inspect max-incomplete high 200
+
+
+!--- Forbid ipv6
+no ipv6 access-list no-ipv6 deny any any 
+
+
+no access-list 150 deny ip any any log
+no access-list 151 deny ip any any log
+
+
+
+!--- Temporary --- TELNET FORBIDDEN
+access-list 150 permit tcp any any eq telnet
+access-list 150 permit tcp any eq telnet any
+access-list 151 permit tcp any any eq telnet
+access-list 151 permit tcp any eq telnet any
+
+access-list 150 permit udp 139.165.0.0 0.0.255.255 host ant eq tftp
+access-list 151 permit udp host ant gt 1023 139.165.0.0 0.0.255.255 gt 1023 
+access-list 150 permit udp 139.165.0.0 0.0.255.255 gt 1023 host ant gt 1023
+
+
+!--- 139.165.222.3i-spoof : scarab and termite can not be spoofed from outside
+access-list 151 deny ip host 139.165.222.162 any log
+access-list 151 deny ip host 139.165.222.163 any log
+
+
+!--- ICMP LIMIT inbound
+access-list 152 permit icmp any any
+access-list 151 permit icmp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.31
+
+!--- HTTP
+! from 139.165.222.162
+access-list 151 permit tcp any host 139.165.222.162 eq 80
+access-list 150 permit tcp host 139.165.222.162 eq 80 any established
+! to the internet ???
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 80
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 443
+
+access-list 151 permit tcp any eq 80 139.165.222.160 0.0.0.31 established
+access-list 151 permit tcp any eq 443 139.165.222.160 0.0.0.31 established
+
+access-list 150 deny tcp any any eq 80 log
+access-list 150 deny tcp any any eq 443 log
+
+access-list 150 deny tcp any eq 80 any log
+access-list 150 deny tcp any eq 443 any log
+
+access-list 151 deny tcp any any eq 80 log
+access-list 151 deny tcp any any eq 443 log
+
+access-list 151 deny tcp any eq 80 any log
+access-list 151 deny tcp any eq 443 any log
+
+!--- SSH
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 139.165.0.0 0.0.255.255 eq 22
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 eq 22 139.165.0.0 0.0.255.255
+
+access-list 151 permit tcp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.31 eq 22
+access-list 151 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.222.160 0.0.0.31
+
+access-list 150 deny tcp any any eq 22 log
+access-list 150 deny tcp any eq 22 any log
+
+!--- DHCP
+! discover
+access-list 150 permit udp 0.0.0.0 0.0.0.0 eq 68 255.255.255.255 0.0.0.0 eq 67
+access-list 150 permit udp host 139.165.222.4 eq 67 any eq 68
+access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host 139.165.222.4 eq 67
+
+access-list 150 permit udp host 139.165.222.161 eq 67 any eq 68
+access-list 150 permit udp 139.165.0.0 0.0.255.255 eq 68 host 139.165.222.161 eq 67
+
+! requests
+access-list 150 permit udp 139.165.0.0 0.0.255.255 host 139.165.222.3 eq 67
+access-list 151 permit udp host 139.165.222.3 eq 67 139.165.0.0 0.0.255.255
+
+access-list 150 deny udp any eq 68 any eq 67 log
+access-list 150 deny udp any eq 67 any eq 68 log
+
+access-list 151 deny udp any eq 68 any eq 67 log
+access-list 151 deny udp any eq 67 any eq 68 log
+
+!--- OSPF
+access-list 150 permit ospf any any
+access-list 151 permit ospf any any
+
+!--- DNS - Outbound
+access-list 150 permit udp 139.165.0.0 0.0.255.255 host queen eq domain
+access-list 150 permit tcp 139.165.0.0 0.0.255.255 host queen eq domain
+access-list 151 permit udp host queen eq domain 139.165.0.0 0.0.255.255
+access-list 151 permit tcp host queen eq domain 139.165.0.0 0.0.255.255
+access-list 150 deny udp any any eq domain log
+access-list 150 deny tcp any any eq domain log
+
+!--- LDAP
+access-list 150 permit udp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 389
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 389
+access-list 151 permit udp host 139.165.222.3 eq 389 139.165.222.160 0.0.0.31 established
+access-list 151 permit tcp host 139.165.222.3 eq 389 139.165.222.160 0.0.0.31 established
+
+!--- NFS
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 2049
+access-list 150 permit udp 139.165.222.160 0.0.0.31 host 139.165.222.3 eq 2049
+access-list 151 permit tcp host 139.165.222.3 eq 2049 139.165.222.160 0.0.0.31 established
+access-list 151 permit udp host 139.165.222.3 eq 2049 139.165.222.160 0.0.0.31 established
+
+
+!--- SMTP
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host smtp.ulg.ac.be eq smtp
+access-list 151 permit tcp host smtp.ulg.ac.be eq smtp 139.165.222.160 0.0.0.31 established
+
+!--- FTP
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be gt 1023
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp-data established
+
+access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp 139.165.222.160 0.0.0.31 established
+access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be gt 1023 139.165.222.160 0.0.0.31 established
+access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data 139.165.222.160 0.0.0.31
+
+
+!--- ICMP LIMIT outbound
+access-list 140 permit icmp any any
+access-list 150 permit icmp 139.165.222.160 0.0.0.31 any
+
+!-- SYN FLOODING
+ip inspect max-incomplete low 100
+ip inspect max-incomplete high 200
+
+
+!--- Forbid ipv6
+ipv6 access-list no-ipv6 deny any any 
+
+
+access-list 150 deny ip any any log
+access-list 151 deny ip any any log
+
+
+ ! FIREWALL
+interface FastEthernet0/0
+ ip access-group 150 out
+ ip access-group 151 in
+ ipv6 traffic-filter no-ipv6 in
+ ipv6 traffic-filter no-ipv6 out
+ !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
+ no ip directed-broadcast
+ ! limit icmp traffic
+ rate-limit output access-group 140 500000 3750000 7500000 conform-action transmit exceed-action drop
+ rate-limit input access-group 152 500000 3750000 7500000 conform-action transmit exceed-action drop
+
+
+
