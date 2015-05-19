@@ -147,7 +147,7 @@ access-list 151 deny udp any eq 67 any eq 68 log
 access-list 150 permit ospf any any
 access-list 151 permit ospf any any
 
-!--- DNS - Outbound
+!--- DNS
 access-list 150 permit udp 139.165.0.0 0.0.255.255 host queen eq domain
 access-list 150 permit tcp 139.165.0.0 0.0.255.255 host queen eq domain
 access-list 151 permit udp host queen eq domain 139.165.0.0 0.0.255.255
@@ -189,7 +189,7 @@ ip inspect max-incomplete high 200
 
 
 !--- Forbid ipv6
-ipv6 access-list no-ipv6 deny any any 
+ipv6 access-list no-ipv6 deny any any
 
 
 access-list 150 deny ip any any log
