@@ -159,13 +159,13 @@ access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
 access-list 151 permit tcp host smtp.ulg.ac.be eq smtp any
 
 !--- FTP
-access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp
-access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be gt 1024
-access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp-data established
+access-list 150 permit tcp 139.165.222.60 0.0.0.5 host ftp.student.montefiore.ulg.ac.be eq ftp
+access-list 150 permit tcp 139.165.222.60 0.0.0.5 host ftp.student.montefiore.ulg.ac.be ge 1024
+access-list 150 permit tcp 139.165.222.60 0.0.0.5 host ftp.student.montefiore.ulg.ac.be eq ftp-data established
 
-access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp any established
-access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq 1024 any established
-access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data any
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp 139.165.222.60 0.0.0.5 established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be ge 1024 139.165.222.60 0.0.0.5 established
+access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data 139.165.222.60 0.0.0.5
 
 
 
@@ -183,7 +183,6 @@ ip inspect max-incomplete high 200
 !--- Forbid ipv6
 ipv6 access-list no-ipv6 deny any any
 
-!--- anti spoof
 ! access-list 150 permit ip scarab 0.0.0.0 any
 ! access-list 150 permit ip termite 0.0.0.0 any
 access-list 150 deny ip any any log
