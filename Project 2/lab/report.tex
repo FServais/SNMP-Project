@@ -59,16 +59,16 @@ In order to protect our subnet, we used extended access lists and rate limitatio
  % Discuss the advantages and drawbacks of your approach regarding security, efficiency and readability/ease of (re)configuration.
  We based ourselves a lot on the standard ports in order to filter the traffic according to each protocol. This could be a big limitation if the standard ports were not used, but when we scanned the ports of the server, we saw that these ports were used in almost every cases (sometimes there is other ports dedicated in addition to the standard ones).
 \section{Authorized inbound traffic}
-\paragraph{ICMP} We decided to limit the icmp traffic to less than 10 percent of the bandwidth of the link. We did not differentiate according to the type of \texttt{ICMP} as there are so many of them and as \texttt{ICMP} is not absolutely necessary to the proper function of a network.
+\paragraph{ICMP} We decided to limit the icmp traffic to less than 5\% of the bandwidth of the link. We did not differentiate according to the type of \texttt{ICMP} as there are so many of them and as \texttt{ICMP} is not absolutely necessary to the proper function of a network.
 
 \paragraph{HTTP(S)} We accepted connections to the standard ports 80 and 443 of our web server. We also authorized traffic in the other direction for established connections.
 
-\paragraph{SSH} We authorized any connection from a machine of the subnet towards another machine (of the subnet) and the responses.
+\paragraph{SSH} We authorized any connection from a machine of the subnet towards another machine (of the subnet) and the replies.
 
 \section{Authorized outbound traffic}
-\paragraph{Essential services} The two essential services we identified was the routing protocol in this case OSPF and also DHCP. We authorized any traffic for OSPF. For DHCP, we authorized the discovery process and requests again on the standard ports. In order to design the rules for DHCP, we had to observe the traffic on our subnet.
+\paragraph{Essential services} The two essential services we identified were the routing protocol. In this case : OSPF and DHCP. We authorized any traffic for OSPF. For DHCP, we authorized the discovery process and requests on the standard ports again. In order to design the rules for DHCP, we had to observe the traffic on our subnet.
 
-\paragraph{DNS} We authorized traffic towards Queen with the standard port.
+\paragraph{DNS} We authorized traffic towards Queen with the standard port. Both TCP and UDP were allowed because in some cases, TCP can be used when packets are too big.
 
 \paragraph{ICMP}
 \paragraph{LDAP}
@@ -80,13 +80,13 @@ In order to protect our subnet, we used extended access lists and rate limitatio
 \paragraph{LOGS} The problem we face when storing our logs on bee is that bee is outside our subnet and we don't know how bee is protected against intrusions. It would be annoying for us if an attacker had access to our logs, because he could learn a lot of things about our firewall and adapt his attacks to the properties of our firewall. It would be easier for him to attack us with the informations provided by the log.
 
 \section{General rules}
-As asked, we denied all traffic that was not explicitly authorized. For the response, we used the keyword \texttt{established} in our access lists in order to permit these rules with only established connections. To forbid IPv6, we made only one IPv6 access list which denied all kind of traffic. Now let's focus on the mechanism we set up against attacks.
+As asked, we denied all traffic that was not explicitly authorized. For the reply, we used the keyword \texttt{established} in our access lists in order to permit these rules with only established connections. To forbid IPv6, we made only one IPv6 access list which denied all kind of traffic. Now let's focus on the mechanism we set up against attacks.
 
 \paragraph{Spoofing}
 First we denied all kind of traffic which had Ladybug or Hornet as source on our incoming interface. We refuse traffic spoofing Hornet or Ladybug from outside our network. This measure is limited : Hornet could spoof Ladybug, and anyone connecting in our subnet could do it too. Also as there is no established subnet mask for the subnet, the rules in order to protect the internet and the rest of our network from our network are complicated. Ideally we should drop any traffic outgoing which is not from Hornet or Ladybug, but this would prevent any traffic if a machine was added in our network and it would not be easy to maintain in this case. So for now we don't protect the world from our network.
 
 \paragraph{Smurf attack}
-The principle of the smurf attack is to broadcast a message from a spoofed source in order to return a huge number of responses to that victim.
+The principle of the smurf attack is to broadcast a message from a spoofed source in order to return a huge number of replies to that victim.
 In order to moderate he effect of such an attack, we limit the number of broadcast packets that can be emitted towards our network. In that way the number of packets in our network is limited and as there are no many machines, it would be difficult to be an efficient amplifier.
 We could not simply forbid any broadcast packets as it is used by DHCP. Note that as the icmp packets are limited, a smurf attack using icmp would fail.
 
