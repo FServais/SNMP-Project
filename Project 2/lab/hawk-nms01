@@ -28,26 +28,26 @@ ip name-server 139.165.223.30
 ! INTERFACES
 
 interface FastEthernet0/0
- description Default VLAN
- ip address 139.165.222.5 255.255.255.128
+description Default VLAN
+ip address 139.165.222.5 255.255.255.128
 
 interface FastEthernet0/1
- description Subnet 222.128/27
- ip address 139.165.222.129 255.255.255.224
- ! IP adress of DHCP server, for DHCP relayingsyn
- ip helper-address 139.165.222.3
+description Subnet 222.128/27
+ip address 139.165.222.129 255.255.255.224
+! IP adress of DHCP server, for DHCP relayingsyn
+ip helper-address 139.165.222.3
 
 interface Serial0/1
- shutdown
- ip unnumbered FastEthernet0/0
- autodetect encapsulation ppp
+shutdown
+ip unnumbered FastEthernet0/0
+autodetect encapsulation ppp
 
 ! ROUTING
 
 router ospf 1
- router-id 139.165.222.5
- log-adjacency-changes
- network 139.165.222.0 0.0.0.255 area 0
+router-id 139.165.222.5
+log-adjacency-changes
+network 139.165.222.0 0.0.0.255 area 0
 
 ! Use DNS names when showing OSPF information
 ip ospf name-lookup
@@ -58,47 +58,47 @@ banner motd /Welcome in RUN lab (owl)/
 
 ! Console
 line con 0
- exec-timeout 30 0
- login local
+exec-timeout 30 0
+login local
 ! Telnet
 line vty 0 4
- exec-timeout 60 0
- login local
+exec-timeout 60 0
+login local
 
 ! FIREWALL
 interface FastEthernet0/0
- ip access-group 150 out
- ip access-group 151 in
- ipv6 traffic-filter no-ipv6 in
- ipv6 traffic-filter no-ipv6 out
- ! limit icmp traffic
- rate-limit output access-group 140 500000 3750000 7500000 conform-action transmit exceed-action drop
- rate-limit input access-group 152 500000 3750000 7500000 conform-action transmit exceed-action drop
+ip access-group 150 out
+ip access-group 151 in
+ipv6 traffic-filter no-ipv6 in
+ipv6 traffic-filter no-ipv6 out
+! limit icmp traffic
+rate-limit output access-group 140 5000000 3750000 7500000 conform-action transmit exceed-action drop
+rate-limit input access-group 152 5000000 3750000 7500000 conform-action transmit exceed-action drop
 
 
 !--- Temporary --- TELNET FORBIDDEN
 access-list 150 permit tcp any any eq telnet
 access-list 150 permit tcp any eq telnet any
 
- 
+
 !--- anti-spoof : scarab and termite can not be spoofed from outside
 access-list 151 deny hornet 0.0.0.0 any 
 access-list 151 deny ladybug 0.0.0.0 any 
 
 !--- ICMP LIMIT inbound
 access-list 152 permit icmp any any
-access-list 150 permit icmp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255
+access-list 150 permit icmp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.5
 
 !--- HTTP
 ! from scarab
 access-list 151 permit tcp any host hornet eq 80
 access-list 150 permit tcp host hornet eq 80 any established
 ! to the internet ???
-access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 80
-access-list 150 permit tcp 139.165.0.0 0.0.255.255 any eq 443
+access-list 150 permit tcp 139.165.222.160 0.0.0.5 any eq 80
+access-list 150 permit tcp 139.165.222.160 0.0.0.5 any eq 443
 
-access-list 151 permit tcp any eq 80 139.165.0.0 0.0.255.255 established
-access-list 151 permit tcp any eq 443 139.165.0.0 0.0.255.255 established
+access-list 151 permit tcp any eq 80 139.165.222.160 0.0.0.5 established
+access-list 151 permit tcp any eq 443 139.165.222.160 0.0.0.5 established
 
 access-list 150 deny tcp any any eq 80 log
 access-list 150 deny tcp any any eq 443 log
@@ -107,11 +107,11 @@ access-list 150 deny tcp any eq 80 any
 access-list 150 deny tcp any eq 443 any
 
 !--- SSH
-access-list 150 permit tcp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255 eq 22
-access-list 150 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.0.0 0.0.255.255
+access-list 150 permit tcp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.5 eq 22
+access-list 150 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.222.160 0.0.0.5
 
-access-list 151 permit tcp 139.165.0.0 0.0.255.255 139.165.0.0 0.0.255.255 eq 22
-access-list 151 permit tcp 139.165.0.0 0.0.255.255 eq 22 139.165.0.0 0.0.255.255
+access-list 151 permit tcp 139.165.222.160 0.0.0.5 139.165.0.0 0.0.255.255 eq 22
+access-list 151 permit tcp 139.165.222.160 0.0.0.5 eq 22 139.165.0.0 0.0.255.255
 
 access-list 150 deny tcp any any eq 22 log
 access-list 150 deny tcp any eq 22 any log
@@ -151,8 +151,6 @@ access-list 151 permit ip ant eq 389 any established
 !--- NFS 
 access-list 150 permit ip any ant eq 2049
 access-list 151 permit ip ant eq 2049 any established
-!--- FTP 
-
 
 !--- SMTP
 access-list 150 permit tcp any host smtp.ulg.ac.be eq smtp
@@ -166,7 +164,6 @@ access-list 150 permit tcp any host ftp.student.montefiore.ulg.ac.be eq ftp-data
 access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp any established
 access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq 1024 any established
 access-list 150 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data any
-
 
 
 !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
@@ -188,7 +185,6 @@ ipv6 access-list no-ipv6 deny any any
 ! access-list 150 permit ip termite 0.0.0.0 any
 access-list 150 deny ip any any log
 access-list 151 deny ip any any log
-
 
 ! access-list 101 permit tcp any host scarab eq www
 ! access-list 101 permit tcp host owl host bumblebee eq telnet
