@@ -71,6 +71,8 @@ interface FastEthernet0/0
  ip access-group 151 in
  ipv6 traffic-filter no-ipv6 in
  ipv6 traffic-filter no-ipv6 out
+ !--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
+ no ip directed-broadcast
  ! limit icmp traffic
  rate-limit output access-group 140 500000 3750000 7500000 conform-action transmit exceed-action drop
  rate-limit input access-group 152 500000 3750000 7500000 conform-action transmit exceed-action drop
@@ -167,17 +169,16 @@ access-list 151 permit tcp host smtp.ulg.ac.be eq smtp 139.165.222.160 0.0.0.31 
 
 !--- FTP
 access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp
-access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be ge 1024
+access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be gt 1023
 access-list 150 permit tcp 139.165.222.160 0.0.0.31 host ftp.student.montefiore.ulg.ac.be eq ftp-data established
 
 access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp 139.165.222.160 0.0.0.31 established
-access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be ge 1024 139.165.222.160 0.0.0.31 established
+access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be gt 1023 139.165.222.160 0.0.0.31 established
 access-list 151 permit tcp host ftp.student.montefiore.ulg.ac.be eq ftp-data 139.165.222.160 0.0.0.31
 
 
 
-!--- Protection against smurf/DNS amplifier attack : limit broadcasting in the lan
-no ip directed-broadcast
+
 !--- ICMP LIMIT outbound
 access-list 140 permit icmp any any
 access-list 150 permit icmp 139.165.222.160 0.0.0.31 any
