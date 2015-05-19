@@ -76,7 +76,11 @@ In order to protect our subnet, we used extended access lists and rate limitatio
 \paragraph{NFS} we authorized traffic towards ant on the port 389. If we had more time we would have used the port mapper in order to allow other services of NFS proposed on ant.
 \paragraph{HTTP(S)} We authorized traffic to the internet on the standard ports of HTTP and HTTPS.
 \paragraph{SMTP} We authorized traffic to the SMTP server on the standard port of SMTP.
-\paragraph{FTP}
+\paragraph{FTP} We authorized both active and passive mode :
+\begin{itemize}
+    \item Active mode : traffic from the subnet to the ftp server on port 21 and the replies of this connection are allowed. For the data traffic, it is allowed when coming from the server on its port 20.
+    \item Passive mode : For the command communication it works the same way as in active mode. For the data traffic, we allowed connections from the subnet to proctect towards the server on a port greater than 1023 since it is not determined. Replies of this connection are also allowed.
+\end{itemize}
 \paragraph{SSH} We authorized outbound traffic to the network on the standard SSH port.
 \paragraph{LOGS} The problem we face when storing our logs on bee is that bee is outside our subnet and we don't know how bee is protected against intrusions. It would be annoying for us if an attacker had access to our logs, because he could learn a lot of things about our firewall and adapt his attacks to the properties of our firewall. It would be easier for him to attack us with the informations provided by the log.
 
