@@ -98,7 +98,8 @@ access-list 151 permit icmp 139.165.0.0 0.0.255.255 139.165.222.160 0.0.0.31
 ! from hornet
 access-list 151 permit tcp any host hornet eq 80
 access-list 150 permit tcp host hornet eq 80 any established
-! to the internet ???
+
+! to the internet
 access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 80
 access-list 150 permit tcp 139.165.222.160 0.0.0.31 any eq 443
 
