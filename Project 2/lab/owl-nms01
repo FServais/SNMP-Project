@@ -2,7 +2,7 @@
 
 version 12.2
 boot system flash:c2600-ik8o3s-mz.122-11.T.bin
-username root privilege 15 secret 5 $1$yHfA$BCU.6OOi6z.YujYn10gKt/
+username root privilege 15 secret 5 $1$1MPj$xVsv.hFfNaNm4UjCroQEm.
 
 ! SERVICES
 
@@ -29,12 +29,12 @@ ip name-server 139.165.223.30
 
 interface FastEthernet0/0
  description Default VLAN
- ip address 139.165.222.5 255.255.255.128
+ ip address 139.165.222.4 255.255.255.128
 
 interface FastEthernet0/1
- description Subnet 222.128/27
- ip address 139.165.222.129 255.255.255.224
- ! IP adress of DHCP server, for DHCP relayingsyn
+ description Subnet 222.160/27
+ ip address 139.165.222.161 255.255.255.224
+ ! IP adress of DHCP server, for DHCP relaying
  ip helper-address 139.165.222.3
 
 interface Serial0/1
@@ -45,7 +45,7 @@ interface Serial0/1
 ! ROUTING
 
 router ospf 1
- router-id 139.165.222.5
+ router-id 139.165.222.4
  log-adjacency-changes
  network 139.165.222.0 0.0.0.255 area 0
 
@@ -65,7 +65,7 @@ line vty 0 4
  exec-timeout 60 0
  login local
 
-! FIREWALL
+ ! FIREWALL
 interface FastEthernet0/0
  ip access-group 150 out
  ip access-group 151 in
@@ -80,10 +80,10 @@ interface FastEthernet0/0
 access-list 150 permit tcp any any eq telnet
 access-list 150 permit tcp any eq telnet any
 
- 
+
 !--- anti-spoof : scarab and termite can not be spoofed from outside
-access-list 151 deny hornet 0.0.0.0 any 
-access-list 151 deny ladybug 0.0.0.0 any 
+access-list 151 deny hornet 0.0.0.0 any
+access-list 151 deny ladybug 0.0.0.0 any
 
 !--- ICMP LIMIT inbound
 access-list 152 permit icmp any any
@@ -148,10 +148,10 @@ access-list 150 deny tcp any any eq domain log
 access-list 150 permit ip any ant eq 389
 access-list 151 permit ip ant eq 389 any established
 
-!--- NFS 
+!--- NFS
 access-list 150 permit ip any ant eq 2049
 access-list 151 permit ip ant eq 2049 any established
-!--- FTP 
+!--- FTP
 
 
 !--- SMTP
